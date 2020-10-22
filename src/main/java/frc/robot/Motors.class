@@ -1,0 +1,20 @@
+package frc.robot;
+
+public class Motors {
+    public class Gripper {
+        static void init() {
+            right.configFactoyDefault();
+            right.setInverted(false);
+            left.configFactoyDefault();
+            left.setInverted(true);
+            left.folow(right);
+        }
+
+        public static final WPI_TalonSRX right = new WPI_TalonSRX(12);
+        public static final WPI_TalonSRX left = new WPI_TalonSRX(9);
+    }
+
+    static void initMotors() {
+        Gripper.init();
+    }
+}
