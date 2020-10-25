@@ -8,26 +8,26 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.GripperBackwards;
+import frc.robot.commands.GripperForward;
 
 public class RobotContainer {
+	private Joystick joystickDrive = new Joystick(Constants.joystickDrivePort);
+	private Joystick joystickControll = new Joystick(Constants.joystickControllPort);
 
+	private JoystickButton gripperForwardButton = new JoystickButton(joystickControll, Constants.Gripper.forwardButtonId);
+	private JoystickButton gripperBackwardButton = new JoystickButton(joystickControll, Constants.Gripper.backwardButtonId);
 
-  /**
-   * The container for the robot.  Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer() {
-    configureButtonBindings();
-  }
+	public RobotContainer() {
+		configureButtonBindings();
+	}
 
-  /**
-   * Use this method to define your button->command mappings.  Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a
-   * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-  }
+	private void configureButtonBindings() {
+		gripperBackwardButton.whileHeld(new GripperBackwards());
+		gripperForwardButton.whileHeld(new GripperForward());
+	}
 }
