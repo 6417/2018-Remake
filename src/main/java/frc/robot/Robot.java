@@ -62,7 +62,6 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		Gripper.getInstance().set(0.125);
 	}
 
 	@Override

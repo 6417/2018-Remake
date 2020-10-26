@@ -18,7 +18,7 @@ public class GripperBackwards extends CommandBase {
 
   @Override
   public void initialize() {
-    Gripper.getInstance().set(Constants.Gripper.motorSpeed);
+    Gripper.getInstance().set(-Constants.Gripper.motorSpeed);
   }
 
   @Override
@@ -32,6 +32,6 @@ public class GripperBackwards extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }

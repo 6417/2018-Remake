@@ -19,11 +19,11 @@ package frc.robot;
  */
 public final class Constants {
     public static final int joystickDrivePort = 1;
-    public static final int joystickControllPort = 2;
+    public static final int joystickControllPort = 4;
     public static class Gripper {
         public static final boolean isSubsystemEnabled = true;
-        public static final int leftId = 9;
-        public static final int rightId = 12;
+        public static final int leftId = 13;
+        public static final int rightId = 1;
         public static final double motorSpeed = 0.5;
         public static final int forwardButtonId = 1;
         public static final int backwardButtonId = 2;
