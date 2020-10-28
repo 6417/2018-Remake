@@ -20,11 +20,11 @@ public class Gripper extends SubsystemBase {
 	}
 
 	public static Gripper getInstance() {
-		if (Constants.Gripper.isSubsystemEnabled)
+		if (Constants.Gripper.isSubsystemEnabled) {
 			if (instance == null)
 				instance = new Gripper();
-			else if (instance == null)
-				instance = new EmptyGripper();
+		} else if (instance == null)
+			instance = new EmptyGripper();
 		return instance;
 	}
 
@@ -38,14 +38,13 @@ public class Gripper extends SubsystemBase {
 
 	public void stopRight() {
 		Motors.Gripper.right.stopMotor();
-	}	
-	
+	}
+
 	public void stopLeft() {
 		Motors.Gripper.left.stopMotor();
 	}
 
-	public void set(double speed)
-	{
+	public void set(double speed) {
 		setRight(speed);
 		setLeft(speed);
 	}

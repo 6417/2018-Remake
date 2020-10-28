@@ -19,6 +19,7 @@ package frc.robot;
  */
 public final class Constants {
     public static final int timeOut = 30;
+    public static final int resetButtonId = 3;
 
     public static class Joystick {
         public static final int drivePort = 1;
@@ -37,7 +38,9 @@ public final class Constants {
     public static class Cart {
         public static final boolean isSubsystemEnabled = true;
         public static final int motorId = 3;
-        public static final int driveLenght = 845790;
+        public static final int driveLenght = 845801;
+        public static final int centerPos = 450000;
+        public static final double zeroingSpeed = -0.25;
 
         public static class PID {
             public static final double openloopRamp = 1;

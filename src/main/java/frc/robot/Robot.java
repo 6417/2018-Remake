@@ -7,11 +7,10 @@
 
 package frc.robot;
 
-import frc.robot.Motors;
-import frc.robot.subsystems.Gripper;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.InitialCommand;
+import frc.robot.commands.ZeroCart;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -48,20 +47,22 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 	}
 
+	ZeroCart zeroCart = new ZeroCart();
+
 	@Override
 	public void teleopInit() {
-
+		CommandScheduler.getInstance().schedule(new InitialCommand());
 	}
 
 	@Override
 	public void teleopPeriodic() {
+
 	}
 
 	@Override

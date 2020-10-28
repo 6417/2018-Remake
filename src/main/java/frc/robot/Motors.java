@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -24,24 +25,31 @@ public class Motors {
                 right.configFactoryDefault();
                 right.setInverted(false);
                 left.configFactoryDefault();
-                left.setInverted(true);
+                left.setInverted(InvertType.OpposeMaster);
                 left.follow(right);
             }
         }
     }
 
     public static class Cart {
-        public static WPI_TalonSRX motor = new WPI_TalonSRX(Constants.Cart.motorId);
+        public static WPI_TalonSRX motor;
 
         public static void init() {
             if (Constants.Cart.isSubsystemEnabled) {
+                initMotor();
                 initLimitSwitches();
                 initPID();
                 initEncoder();
             }
         }
 
-        private static void initEncoder() {
+        private static void initMotor() {
+            motor = new WPI_TalonSRX(Constants.Cart.motorId);
+            motor.setInverted(true);
+		}
+                    
+
+		private static void initEncoder() {
             motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.Cart.PID.pidIdx, Constants.timeOut);
         }
 
