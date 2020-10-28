@@ -16,8 +16,8 @@ import frc.robot.commands.GripperBackwards;
 import frc.robot.commands.GripperForward;
 
 public class RobotContainer {
-	private Joystick joystickDrive = new Joystick(Constants.joystickDrivePort);
-	private Joystick joystickControll = new Joystick(Constants.joystickControllPort);
+	private Joystick joystickDrive = new Joystick(Constants.Joystick.drivePort);
+	private Joystick joystickControll = new Joystick(Constants.Joystick.controllPort);
 
 	private JoystickButton gripperForwardButton = new JoystickButton(joystickControll, Constants.Gripper.forwardButtonId);
 	private JoystickButton gripperBackwardButton = new JoystickButton(joystickControll, Constants.Gripper.backwardButtonId);
