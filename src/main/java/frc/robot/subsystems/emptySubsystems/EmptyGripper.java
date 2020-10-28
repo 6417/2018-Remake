@@ -13,23 +13,6 @@ import frc.robot.subsystems.Gripper;
  * Add your docs here.
  */
 public class EmptyGripper extends Gripper {
-
-    @Override
-    public void setRight(double speed) {
-    }
-
-    @Override
-    public void setLeft(double speed) {
-    }
-
-    @Override
-    public void stopRight() {
-    }
-
-    @Override
-    public void stopLeft() {
-    }
-
     @Override
     public void set(double speed) {
     }    
