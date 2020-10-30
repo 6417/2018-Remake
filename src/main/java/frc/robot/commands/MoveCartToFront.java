@@ -28,6 +28,7 @@ public class MoveCartToFront extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getLimitSwitchFront();
+		return Cart.getInstance().getEncoderTicks() + 500 >= Constants.Cart.driveLenght
+				&& Cart.getInstance().getEncoderTicks() - 500 <= Constants.Cart.driveLenght;
 	}
 }

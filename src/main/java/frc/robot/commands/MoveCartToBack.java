@@ -30,6 +30,6 @@ public class MoveCartToBack extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getLimitSwitchBack();
+		return Cart.getInstance().getEncoderTicks() + 500 >= 0 && Cart.getInstance().getEncoderTicks() - 500 <= 0;
 	}
 }

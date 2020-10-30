@@ -39,9 +39,9 @@ public final class Constants {
     public static class Cart {
         public static final boolean isSubsystemEnabled = true;
         public static final int motorId = 3;
-        public static final int driveLenght = 945801;
+        public static final int driveLenght = 858600;
         public static final int centerPos = 450000;
-        public static final double zeroingSpeed = -0.5;
+        public static final double zeroingSpeed = -0.25;
 
         public static final int moveToCenterButtonId = 4;
         public static final int moveToFrontButtonId = 5;

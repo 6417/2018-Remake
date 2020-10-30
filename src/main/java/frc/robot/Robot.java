@@ -37,42 +37,42 @@ public class Robot extends TimedRobot {
 		m_robotContainer = new RobotContainer();
 		Motors.init();
 	}
-
+	
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
-		System.out.println(Cart.getInstance().getEncoderTicks());
 	}
-
+	
 	@Override
 	public void disabledInit() {
 	}
-
+	
 	@Override
 	public void disabledPeriodic() {
 	}
-
+	
 	@Override
 	public void autonomousInit() {
 	}
-
+	
 	@Override
 	public void autonomousPeriodic() {
 	}
-
+	
 	ZeroCart zeroCart = new ZeroCart();
-
+	
 	@Override
 	public void teleopInit() {
-		CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new InitialCommand(), new MoveCartToFront(), new MoveCartToCenter()));
-				// new MoveCartToBack(), new MoveCartToCenter(), new Reset()));
+		CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new InitialCommand(), new MoveCartToFront(), new MoveCartToBack()));
+		// new MoveCartToBack(), new MoveCartToCenter(), new Reset()));
 	}
-
+	
 	@Override
 	public void teleopPeriodic() {
-		
+		if (Cart.getInstance().getLimitSwitchFront())
+			System.out.println(Cart.getInstance().getEncoderTicks());
 	}
-
+	
 	@Override
 	public void testInit() {
 		CommandScheduler.getInstance().cancelAll();
