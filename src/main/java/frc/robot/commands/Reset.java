@@ -8,26 +8,29 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Cart;
+import frc.robot.subsystems.Gripper;
 
-public class MoveCartToCenter extends CommandBase {
-	public MoveCartToCenter() {
-		addRequirements(Cart.getInstance());
+public class Reset extends SequentialCommandGroup {
+	static private class StopAllMotors extends CommandBase {
+		StopAllMotors() {
+			addRequirements(Gripper.getInstance(), Cart.getInstance());
+		}
+
+		@Override
+		public void initialize() {
+			Gripper.getInstance().stop();
+			Cart.getInstance().stop();
+		}
+
+		@Override
+		public boolean isFinished() {
+			return true;
+		}
 	}
-
-	@Override
-	public void initialize() {
-		Cart.getInstance().moveto(Constants.Cart.centerPos);
-	}
-
-	@Override
-	public void end(boolean interrupted) {
-		Cart.getInstance().stop();
-	}
-
-	@Override
-	public boolean isFinished() {
-		return Cart.getInstance().getEncoderVelocity() <= 0.05 && Cart.getInstance().getEncoderVelocity() >= -0.05;
+	
+	public Reset() {
+		addCommands(new StopAllMotors(),new ZeroCart(), new MoveCartToCenter());
 	}
 }

@@ -11,14 +11,14 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Cart;
 
-public class MoveCartToCenter extends CommandBase {
-	public MoveCartToCenter() {
+public class MoveCartToFront extends CommandBase {
+	public MoveCartToFront() {
 		addRequirements(Cart.getInstance());
 	}
 
 	@Override
 	public void initialize() {
-		Cart.getInstance().moveto(Constants.Cart.centerPos);
+		Cart.getInstance().moveto(Constants.Cart.driveLenght);
 	}
 
 	@Override
@@ -28,6 +28,6 @@ public class MoveCartToCenter extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderVelocity() <= 0.05 && Cart.getInstance().getEncoderVelocity() >= -0.05;
+		return Cart.getInstance().getLimitSwitchFront();
 	}
 }

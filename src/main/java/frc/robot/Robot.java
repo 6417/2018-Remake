@@ -9,8 +9,14 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.InitialCommand;
+import frc.robot.commands.MoveCartToBack;
+import frc.robot.commands.MoveCartToCenter;
+import frc.robot.commands.MoveCartToFront;
+import frc.robot.commands.Reset;
 import frc.robot.commands.ZeroCart;
+import frc.robot.subsystems.Cart;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -35,6 +41,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
+		System.out.println(Cart.getInstance().getEncoderTicks());
 	}
 
 	@Override
@@ -57,12 +64,13 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopInit() {
-		CommandScheduler.getInstance().schedule(new InitialCommand());
+		CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new InitialCommand(), new MoveCartToFront(), new MoveCartToCenter()));
+				// new MoveCartToBack(), new MoveCartToCenter(), new Reset()));
 	}
 
 	@Override
 	public void teleopPeriodic() {
-
+		
 	}
 
 	@Override
