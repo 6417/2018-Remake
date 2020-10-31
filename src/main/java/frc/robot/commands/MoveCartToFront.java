@@ -9,29 +9,26 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Gripper;
+import frc.robot.subsystems.Cart;
 
-public class GripperForward extends CommandBase {
-	public GripperForward() {
-		addRequirements(Gripper.getInstance());
+public class MoveCartToFront extends CommandBase {
+	public MoveCartToFront() {
+		addRequirements(Cart.getInstance());
 	}
 
 	@Override
 	public void initialize() {
-		Gripper.getInstance().set(Constants.Gripper.motorSpeed);
-	}
-
-	@Override
-	public void execute() {
+		Cart.getInstance().moveto(Constants.Cart.driveLenght);
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		Gripper.getInstance().stop();
+		Cart.getInstance().stop();
 	}
 
 	@Override
 	public boolean isFinished() {
-		return false;
+		return Cart.getInstance().getEncoderTicks() + 500 >= Constants.Cart.driveLenght
+				&& Cart.getInstance().getEncoderTicks() - 500 <= Constants.Cart.driveLenght;
 	}
 }

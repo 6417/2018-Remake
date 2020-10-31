@@ -12,26 +12,27 @@ import frc.robot.Constants;
 import frc.robot.subsystems.Gripper;
 
 public class GripperBackwards extends CommandBase {
-  
-  public GripperBackwards() {
-  }
 
-  @Override
-  public void initialize() {
-    Gripper.getInstance().set(-Constants.Gripper.motorSpeed);
-  }
+	public GripperBackwards() {
+		addRequirements(Gripper.getInstance());
+	}
 
-  @Override
-  public void execute() {
-  }
+	@Override
+	public void initialize() {
+		Gripper.getInstance().set(-Constants.Gripper.motorSpeed);
+	}
 
-  @Override
-  public void end(boolean interrupted) {
-    Gripper.getInstance().stop();
-  }
+	@Override
+	public void execute() {
+	}
 
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+	@Override
+	public void end(boolean interrupted) {
+		Gripper.getInstance().stop();
+	}
+
+	@Override
+	public boolean isFinished() {
+		return false;
+	}
 }
