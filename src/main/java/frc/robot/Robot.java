@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void autonomousInit() {
+		CommandScheduler.getInstance().schedule(new InitialCommand());
 	}
 	
 	@Override
@@ -52,7 +53,7 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void teleopInit() {
-
+		CommandScheduler.getInstance().schedule(new InitialCommand());
 	}
 	
 	@Override
