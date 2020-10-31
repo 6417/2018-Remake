@@ -47,11 +47,11 @@ public class Motors {
         private static void initMotor() {
             motor = new WPI_TalonSRX(Constants.Cart.motorId);
             motor.setInverted(true);
-		}
-                    
+        }
 
-		private static void initEncoder() {
-            motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.Cart.PID.pidIdx, Constants.timeOut);
+        private static void initEncoder() {
+            motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.Cart.PID.pidIdx,
+                    Constants.timeOut);
         }
 
         private static void initLimitSwitches() {
@@ -82,8 +82,55 @@ public class Motors {
     }
 
     public static class LiftingUnit {
+        public static WPI_TalonSRX master;
+        public static WPI_TalonSRX follower;
+
         public static void init() {
-            
+            initMotors();
+            initEncoder();
+            initLimitSwitches();
+            initPID();
+        }
+
+        private static void initPID() {
+            master.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, Constants.LiftingUnit.PID.framePeriod, Constants.timeOut);
+            master.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, Constants.LiftingUnit.PID.framePeriod, Constants.timeOut);
+            master.configNominalOutputForward(Constants.LiftingUnit.PID.nominalOutForward, Constants.timeOut);
+            master.configNominalOutputReverse(Constants.LiftingUnit.PID.nominalOutReverse, Constants.timeOut);
+            master.configPeakOutputForward(Constants.LiftingUnit.PID.peakOutForward, Constants.timeOut);
+            master.configPeakOutputReverse(Constants.LiftingUnit.PID.peakOutReverse, Constants.timeOut);
+
+            master.selectProfileSlot(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.pidIdx);
+            master.config_kF(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kF, Constants.timeOut);
+            master.config_kP(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kP, Constants.timeOut);
+            master.config_kI(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kI, Constants.timeOut);
+            master.config_kD(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kD, Constants.timeOut);
+            master.config_IntegralZone(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.integralZone);
+            master.configAllowableClosedloopError(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.allowableClosedloopError, Constants.timeOut);
+            master.configMotionCruiseVelocity(Constants.LiftingUnit.PID.cruiseVelocity, Constants.timeOut);
+            master.configMotionAcceleration(Constants.LiftingUnit.PID.maxVelocityEncoderUnitsPer100ms, Constants.timeOut);
+
+            master.setSensorPhase(true);
+        }
+
+        private static void initEncoder() {
+            master.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.LiftingUnit.PID.pidIdx,
+                    Constants.timeOut);
+        }
+
+        private static void initLimitSwitches() {
+            master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
+                    LimitSwitchNormal.NormallyClosed);
+        }
+
+        private static void initMotors() {
+            master = new WPI_TalonSRX(Constants.LiftingUnit.masterId);
+            follower = new WPI_TalonSRX(Constants.LiftingUnit.followerId);
+            master.configFactoryDefault();
+            follower.configFactoryDefault();
+            follower.follow(master);
+            master.setInverted(false);
+            follower.setInverted(InvertType.OpposeMaster);
         }
     }
 

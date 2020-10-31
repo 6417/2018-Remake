@@ -70,8 +70,35 @@ public final class Constants {
     public static class LiftingUnit {
         public static final boolean isSubsystemEnabled = true;
 
+        public static final int masterId = 12;
+        public static final int followerId = 9;
+
+        public static double zeroingSpeed = 0.2;
+
+        
+        public static final int driveLenght = 200000;
+        public static final int scalePosition = 150000;
+        public static final int switchPosition = 60000;
+        public static final int basePosition = 5000;
+
         public static class PID {
+            public static final int pidIdx = 0;
+            public static final int slotIdx = 0;
+            public static final int framePeriod = 10;
+            public static final double nominalOutForward = 0;            
+            public static final double nominalOutReverse = 0;            
+            public static final double peakOutForward = 1;
+            public static final double peakOutReverse = -1;
             
+            public static final double kF = 0.8525;
+            public static final double kP = 1.2;
+            public static final double kI = 0.0;
+            public static final double kD = 18.0;
+            
+            public static final int integralZone = 200;
+            public static final int allowableClosedloopError = 30;
+            public static final int cruiseVelocity = 5333;
+            public static final int maxVelocityEncoderUnitsPer100ms = 4000;
         }
     }
 }
