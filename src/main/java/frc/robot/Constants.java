@@ -66,4 +66,12 @@ public final class Constants {
             public static final int slotIdx = 0;
         }
     }
+
+    public static class LiftingUnit {
+        public static final boolean isSubsystemEnabled = true;
+
+        public static class PID {
+            
+        }
+    }
 }

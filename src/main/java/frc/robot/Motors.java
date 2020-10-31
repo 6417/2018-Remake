@@ -81,8 +81,15 @@ public class Motors {
         }
     }
 
+    public static class LiftingUnit {
+        public static void init() {
+            
+        }
+    }
+
     public static void init() {
         Gripper.init();
         Cart.init();
+        LiftingUnit.init();
     }
 }
