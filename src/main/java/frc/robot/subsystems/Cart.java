@@ -33,7 +33,6 @@ public class Cart extends SubsystemBase {
 	@Override
 	public void periodic() {
 		if (this.getLimitSwitchFront()) {
-			// Motors.Cart.motor.setSelectedSensorPosition(Constants.Cart.driveLenght);
 		}
 		if (this.getLimitSwitchBack()) {
 			Motors.Cart.motor.setSelectedSensorPosition(0);

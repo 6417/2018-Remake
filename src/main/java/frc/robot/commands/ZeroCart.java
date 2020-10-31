@@ -29,8 +29,6 @@ public class ZeroCart extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		// System.out.println(
-		// 		"isFinished has been called with value: " + Boolean.toString(Cart.getInstance().getLimitSwitchBack()));
 		return Cart.getInstance().getLimitSwitchBack();
 	}
 }

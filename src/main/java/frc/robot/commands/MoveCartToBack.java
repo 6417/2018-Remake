@@ -11,9 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Cart;
 
 public class MoveCartToBack extends CommandBase {
-	/**
-	 * Creates a new MoveCartToBack.
-	 */
 	public MoveCartToBack() {
 		addRequirements(Cart.getInstance());
 	}

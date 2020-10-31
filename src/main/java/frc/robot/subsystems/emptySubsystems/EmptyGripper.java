@@ -9,9 +9,6 @@ package frc.robot.subsystems.emptySubsystems;
 
 import frc.robot.subsystems.Gripper;
 
-/**
- * Add your docs here.
- */
 public class EmptyGripper extends Gripper {
 
     @Override
