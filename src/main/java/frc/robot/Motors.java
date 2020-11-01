@@ -86,10 +86,12 @@ public class Motors {
         public static WPI_TalonSRX follower;
 
         public static void init() {
-            initMotors();
-            initEncoder();
-            initLimitSwitches();
-            initPID();
+            if (Constants.LiftingUnit.isSubsystemEnabled){
+                initMotors();
+                initEncoder();
+                initLimitSwitches();
+                initPID();
+            }
         }
 
         private static void initPID() {
