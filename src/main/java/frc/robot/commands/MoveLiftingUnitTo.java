@@ -9,26 +9,29 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Cart;
+import frc.robot.subsystems.LiftingUnit;
 
-public class MoveCartToFront extends CommandBase {
-	public MoveCartToFront() {
-		addRequirements(Cart.getInstance());
+public class MoveLiftingUnitTo extends CommandBase {
+	private int pos;
+
+	public MoveLiftingUnitTo(int pos) {
+		this.pos = pos;
+		addRequirements(LiftingUnit.getInstance());
 	}
 
 	@Override
 	public void initialize() {
-		Cart.getInstance().moveto(Constants.Cart.driveLenght);
+		LiftingUnit.getInstance().moveto(pos);
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		Cart.getInstance().stop();
+		LiftingUnit.getInstance().stop();
 	}
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID.tolerance >= Constants.Cart.driveLenght
-				&& Cart.getInstance().getEncoderTicks() - Constants.Cart.PID.tolerance <= Constants.Cart.driveLenght;
+		return LiftingUnit.getInstance().getEncoderTicks() + Constants.LiftingUnit.PID.tolerance >= Constants.LiftingUnit.driveLenght
+				&& LiftingUnit.getInstance().getEncoderTicks() - Constants.LiftingUnit.PID.tolerance <= Constants.LiftingUnit.driveLenght;
 	}
 }

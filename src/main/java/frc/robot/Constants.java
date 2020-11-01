@@ -38,6 +38,7 @@ public final class Constants {
         public static final int moveToBackButtonId = 6;
 
         public static class PID {
+            public static final int tolerance = 500;
             public static final double openloopRamp = 1;
             public static final double closedloopRamp = 0;
             public static final double kf = 0.0465;
@@ -72,6 +73,7 @@ public final class Constants {
         public static final int basePosition = 5000;
 
         public static class PID {
+            public static final int tolerance = 200;
             public static final int pidIdx = 0;
             public static final int slotIdx = 0;
             public static final int framePeriod = 10;

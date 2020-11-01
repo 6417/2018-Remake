@@ -8,6 +8,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.Cart;
 
 public class MoveCartToBack extends CommandBase {
@@ -27,6 +28,6 @@ public class MoveCartToBack extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderTicks() + 500 >= 0 && Cart.getInstance().getEncoderTicks() - 500 <= 0;
+		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID.tolerance >= 0 && Cart.getInstance().getEncoderTicks() - Constants.Cart.PID.tolerance <= 0;
 	}
 }

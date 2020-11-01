@@ -28,8 +28,8 @@ public class MoveCartToCenter extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderTicks() + 500 >= Constants.Cart.centerPos
-				&& Cart.getInstance().getEncoderTicks() - 500 <= Constants.Cart.centerPos;
+		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID.tolerance >= Constants.Cart.centerPos
+				&& Cart.getInstance().getEncoderTicks() - Constants.Cart.PID.tolerance <= Constants.Cart.centerPos;
 
 	}
 }
