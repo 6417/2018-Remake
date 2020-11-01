@@ -65,12 +65,16 @@ public final class Constants {
         public static final int followerId = 9;
 
         public static final double zeroingSpeed = 0.2;
-
         
         public static final int driveLenght = 200000;
         public static final int scalePosition = 150000;
         public static final int switchPosition = 60000;
         public static final int basePosition = 5000;
+
+        public static final int moveLiftingUnitToTopButtonId = 7;
+        public static final int moveLiftingUnitToScalePositionButtonId = 8;
+        public static final int moveLiftingUnitToSwitchButtonId = 9;
+        public static final int moveLiftingUnitToBottomButtonId = 10;
 
         public static class PID {
             public static final int tolerance = 200;
