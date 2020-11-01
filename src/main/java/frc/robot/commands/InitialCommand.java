@@ -7,10 +7,11 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public class InitialCommand extends SequentialCommandGroup {
+public class InitialCommand extends ParallelCommandGroup {
 	public InitialCommand() {
-		addCommands(new ZeroCart().andThen(new MoveCartToCenter()));
+		addCommands(new SequentialCommandGroup(new ZeroCart(), new MoveCartToCenter()), new ZeroLiftingUnit());
 	}
 }
