@@ -9,12 +9,12 @@ package frc.Arduino;
 
 import edu.wpi.first.wpilibj.I2C;
 
-public class ArduinoEncoder {
+public class ArduinoAbsoluteEncoder {
     private I2C device;
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C 
      */
-    ArduinoEncoder(I2C.Port port, int deviceAdress) {
+    ArduinoAbsoluteEncoder(I2C.Port port, int deviceAdress) {
         device = new I2C(port, deviceAdress);
     }
 
@@ -26,7 +26,7 @@ public class ArduinoEncoder {
      */
     public boolean setHome() {
         byte[] buffer = new byte[1];
-        return device.read(0x01, 1, buffer);
+        return !device.read(0x01, 1, buffer);
     }
 
     /**
@@ -37,7 +37,7 @@ public class ArduinoEncoder {
     public byte getPosition() {
         byte[] buffer = new byte[1];
         if (device.read(0x00, 1, buffer))
-            buffer = null;
+            return null;
         return buffer[0];
     }
 }
