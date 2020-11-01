@@ -55,4 +55,8 @@ public class LiftingUnit extends SubsystemBase {
 	public int getEncoderVelocity() {
 		return Motors.LiftingUnit.master.getSelectedSensorVelocity();
 	}
+
+	public void stop() {
+		Motors.LiftingUnit.master.stopMotor();
+	}
 }

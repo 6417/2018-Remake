@@ -14,7 +14,7 @@ import frc.robot.commands.GripperForward;
 import frc.robot.commands.MoveCartToBack;
 import frc.robot.commands.MoveCartToCenter;
 import frc.robot.commands.MoveCartToFront;
-import frc.robot.commands.Reset;
+import frc.robot.commands.ResetCommand;
 
 public class RobotContainer {
 	public Joystick joystickDrive = new Joystick(Constants.Joystick.drivePort);
@@ -34,7 +34,7 @@ public class RobotContainer {
 	private void configureButtonBindings() {
 		gripperBackwardButton.whileHeld(new GripperBackwards());
 		gripperForwardButton.whileHeld(new GripperForward());
-		resetButton.whenPressed(new Reset());
+		resetButton.whenPressed(new ResetCommand());
 		moveCartToCenterButton.whenPressed(new MoveCartToCenter());
 		moveCartToFrontButton.whenPressed(new MoveCartToFront());
 		moveCartToBackButton.whenPressed(new MoveCartToBack());

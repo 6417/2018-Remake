@@ -36,4 +36,8 @@ public class EmptyLiftingUnit extends LiftingUnit {
     public int getEncoderVelocity() {
         return 0;
     }
+
+    @Override
+    public void stop() {
+    }
 }

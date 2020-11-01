@@ -14,7 +14,7 @@ import frc.robot.commands.InitialCommand;
 import frc.robot.commands.MoveCartToBack;
 import frc.robot.commands.MoveCartToCenter;
 import frc.robot.commands.MoveCartToFront;
-import frc.robot.commands.Reset;
+import frc.robot.commands.ResetCommand;
 import frc.robot.commands.ZeroCart;
 import frc.robot.subsystems.Cart;
 
