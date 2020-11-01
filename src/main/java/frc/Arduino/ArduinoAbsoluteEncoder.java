@@ -32,12 +32,12 @@ public class ArduinoAbsoluteEncoder {
     /**
      * @return
      * Returns the current position of the encoder. 
-     * Returns null if the transfer wasn't successfull
+     * Returns -1 if the transfer wasn't successfull
      */
     public byte getPosition() {
         byte[] buffer = new byte[1];
         if (device.read(0x00, 1, buffer))
-            return null;
+            return -1;
         return buffer[0];
     }
 }
