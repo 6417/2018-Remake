@@ -29,6 +29,6 @@ public class ZeroCart extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getLimitSwitchBack();
+		return Cart.getInstance().getLimitSwitchBack() || Cart.getInstance().getLimitSwitchFront();
 	}
 }

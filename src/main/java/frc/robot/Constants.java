@@ -31,7 +31,7 @@ public final class Constants {
         public static final int motorId = 3;
         public static final int driveLenght = 858600;
         public static final int centerPos = 450000;
-        public static final double zeroingSpeed = -0.25;
+        public static final double zeroingSpeed = -0.5;
 
         public static final int moveToCenterButtonId = 4;
         public static final int moveToFrontButtonId = 5;
@@ -64,12 +64,12 @@ public final class Constants {
         public static final int masterId = 12;
         public static final int followerId = 9;
 
-        public static final double zeroingSpeed = 0.2;
+        public static final double zeroingSpeed = 0.05;
         
         public static final int driveLenght = 200000;
         public static final int scalePosition = 150000;
         public static final int switchPosition = 60000;
-        public static final int basePosition = 5000;
+        public static final int basePosition = 0;
 
         public static final int moveLiftingUnitToTopButtonId = 7;
         public static final int moveLiftingUnitToScalePositionButtonId = 8;

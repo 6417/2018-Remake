@@ -38,11 +38,11 @@ public class RobotContainer {
 	private JoystickButton moveLiftingUnitToTopButton = new JoystickButton(joystickControll,
 			Constants.LiftingUnit.moveLiftingUnitToTopButtonId);
 	private JoystickButton moveLiftingUnitToScalePositionButton = new JoystickButton(joystickControll,
-			Constants.LiftingUnit.moveLiftingUnitToTopButtonId);
+			Constants.LiftingUnit.moveLiftingUnitToScalePositionButtonId);
 	private JoystickButton moveLiftingUnitToSwitchButton = new JoystickButton(joystickControll,
-			Constants.LiftingUnit.moveLiftingUnitToTopButtonId);
+			Constants.LiftingUnit.moveLiftingUnitToSwitchButtonId);
 	private JoystickButton moveLiftingUnitToBottomButton = new JoystickButton(joystickControll,
-			Constants.LiftingUnit.moveLiftingUnitToTopButtonId);
+			Constants.LiftingUnit.moveLiftingUnitToBottomButtonId);
 
 	public RobotContainer() {
 		configureButtonBindings();

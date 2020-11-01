@@ -8,7 +8,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.LiftingUnit;
 
 public class MoveLiftingUnitTo extends CommandBase {
@@ -22,16 +21,5 @@ public class MoveLiftingUnitTo extends CommandBase {
 	@Override
 	public void initialize() {
 		LiftingUnit.getInstance().moveto(pos);
-	}
-
-	@Override
-	public void end(boolean interrupted) {
-		LiftingUnit.getInstance().stop();
-	}
-
-	@Override
-	public boolean isFinished() {
-		return LiftingUnit.getInstance().getEncoderTicks() + Constants.LiftingUnit.PID.tolerance >= Constants.LiftingUnit.driveLenght
-				&& LiftingUnit.getInstance().getEncoderTicks() - Constants.LiftingUnit.PID.tolerance <= Constants.LiftingUnit.driveLenght;
 	}
 }

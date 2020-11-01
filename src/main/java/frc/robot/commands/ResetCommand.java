@@ -17,7 +17,7 @@ import frc.robot.subsystems.Gripper;
 public class ResetCommand extends SequentialCommandGroup {
 	static private class StopAllMotors extends CommandBase {
 		StopAllMotors() {
-			addRequirements(Gripper.getInstance(), Cart.getInstance());
+			addRequirements(Gripper.getInstance(), Cart.getInstance(), LiftingUnit.getInstance());
 		}
 
 		@Override
@@ -34,6 +34,6 @@ public class ResetCommand extends SequentialCommandGroup {
 	}
 	
 	public ResetCommand() {
-		addCommands(new StopAllMotors(), new ParallelCommandGroup(new SequentialCommandGroup(new ZeroCart(), new MoveCartToCenter()), new ZeroLiftingUnit()));
+		super(new StopAllMotors(), new ParallelCommandGroup(new SequentialCommandGroup(new ZeroCart(), new MoveCartToCenter()), new ZeroLiftingUnit()));
 	}
 }

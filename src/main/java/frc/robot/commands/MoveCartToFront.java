@@ -23,7 +23,6 @@ public class MoveCartToFront extends CommandBase {
 
 	@Override
 	public void end(boolean interrupted) {
-		Cart.getInstance().stop();
 	}
 
 	@Override
