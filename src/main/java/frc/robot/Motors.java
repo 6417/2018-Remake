@@ -40,7 +40,7 @@ public class Motors {
         }
 
         private static void initMotors() {
-            right  = new WPI_TalonSRX(Constants.Gripper.rightId);
+            right = new WPI_TalonSRX(Constants.Gripper.rightId);
             left = new WPI_TalonSRX(Constants.Gripper.leftId);
         }
     }
@@ -119,7 +119,7 @@ public class Motors {
         public static WPI_TalonSRX follower;
 
         public static void init() {
-            if (Constants.LiftingUnit.isSubsystemEnabled){
+            if (Constants.LiftingUnit.isSubsystemEnabled) {
                 initMotors();
                 initEncoder();
                 initLimitSwitches();
@@ -132,15 +132,16 @@ public class Motors {
             configOutputs();
             configPIDConstants();
             configPIDSpeeds();
-            
+
             master.setSensorPhase(true);
         }
 
         private static void configPIDSpeeds() {
             master.configMotionCruiseVelocity(Constants.LiftingUnit.PID.cruiseVelocity, Constants.timeOut);
-            master.configMotionAcceleration(Constants.LiftingUnit.PID.maxVelocityEncoderUnitsPer100ms, Constants.timeOut);
+            master.configMotionAcceleration(Constants.LiftingUnit.PID.maxVelocityEncoderUnitsPer100ms,
+                    Constants.timeOut);
         }
-        
+
         private static void configPIDConstants() {
             master.selectProfileSlot(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.pidIdx);
             master.config_kF(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kF, Constants.timeOut);
@@ -148,7 +149,8 @@ public class Motors {
             master.config_kI(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kI, Constants.timeOut);
             master.config_kD(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.kD, Constants.timeOut);
             master.config_IntegralZone(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.integralZone);
-            master.configAllowableClosedloopError(Constants.LiftingUnit.PID.slotIdx, Constants.LiftingUnit.PID.allowableClosedloopError, Constants.timeOut);
+            master.configAllowableClosedloopError(Constants.LiftingUnit.PID.slotIdx,
+                    Constants.LiftingUnit.PID.allowableClosedloopError, Constants.timeOut);
         }
 
         private static void configOutputs() {
@@ -159,8 +161,10 @@ public class Motors {
         }
 
         private static void configStatusFramePeriods() {
-            master.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, Constants.LiftingUnit.PID.framePeriod, Constants.timeOut);
-            master.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, Constants.LiftingUnit.PID.framePeriod, Constants.timeOut);
+            master.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, Constants.LiftingUnit.PID.framePeriod,
+                    Constants.timeOut);
+            master.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic,
+                    Constants.LiftingUnit.PID.framePeriod, Constants.timeOut);
         }
 
         private static void initEncoder() {
@@ -196,9 +200,36 @@ public class Motors {
         }
     }
 
+    public static class SwerveDrive {
+        public static WPI_TalonSRX frontLeftMotorVelocity;
+        public static WPI_TalonSRX frontRightMotorVelocity;
+        public static WPI_TalonSRX backRightMotorVelocity;
+        public static WPI_TalonSRX backLeftMotorVelocity;
+        public static WPI_TalonSRX frontLeftMotorRotation;
+        public static WPI_TalonSRX frontRightMotorRotation;
+        public static WPI_TalonSRX backRightMotorRotation;
+        public static WPI_TalonSRX backLeftMotorRotation;
+
+        public static void init() {
+            constructMotors();
+        }
+
+        private static void constructMotors() {
+            frontLeftMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.frontLeftMotorVelocityId);
+            frontRightMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.frontRightMotorVelocityId);
+            backRightMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.backRightMotorVelocityId);
+            backLeftMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.backLeftMotorVelocityId);
+            frontLeftMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.frontLeftMotorRotationId);
+            frontRightMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.frontRightMotorRotationId);
+            backRightMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.backRightMotorRotationId);
+            backLeftMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.backLeftMotorRotationId);
+        }
+    }
+
     public static void init() {
         Gripper.init();
         Cart.init();
         LiftingUnit.init();
+        SwerveDrive.init();
     }
 }

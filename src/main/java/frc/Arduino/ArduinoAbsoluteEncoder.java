@@ -13,6 +13,10 @@ public class ArduinoAbsoluteEncoder {
     private I2C device;
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C 
+     * 
+     * @param port The I2C port the device is connected to.
+     * 
+     * @param deviceAddress The address of the device on the I2C bus.
      */
     ArduinoAbsoluteEncoder(I2C.Port port, int deviceAdress) {
         device = new I2C(port, deviceAdress);
@@ -32,7 +36,7 @@ public class ArduinoAbsoluteEncoder {
     /**
      * @return
      * Returns the current position of the encoder. 
-     * Returns -1 if the transfer wasn't successfull
+     * Returns -1 if the transfer wasn't successfull.
      */
     public byte getPosition() {
         byte[] buffer = new byte[1];
