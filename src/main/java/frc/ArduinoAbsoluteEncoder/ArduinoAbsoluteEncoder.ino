@@ -1,10 +1,8 @@
 #include <Wire.h>
-#include <Encoder8bit.h>
+#include "AbsoluteEncoder8bit.h"
 
 //variables for pins
 const uint16_t dipSwitchPins[4] {A3, A2, A1, A0};
-const byte ledPinRed = 12;
-const byte ledPinGreen = 13;
 
 //variables for code
 uint8_t adress = 0;
@@ -20,14 +18,14 @@ enum Rquest {
   RETURN_ABS_POSITION = 0x00,
   SET_HOME = 0x01,
   RETURN_REL_POSITION = 0x02
-}
+};
 
 //functions for code
 void receiveEvent();
 void requestEvent();
 void returnAbsPosition();
 
-Encoder8bit encoder(6, 7, 8, 9, 2, 3, 4, 5);
+Encoder8bit encoder{6, 7, 8, 9, 2, 3, 4, 5};
 
 void setup()
 {
@@ -66,23 +64,20 @@ void receiveEvent()//on receive event save requested register
 void requestEvent()//on request event transmit requested data
 {
   Serial.println("master requested response");
-  switch((Request) registerRequest)
+  switch(registerRequest)
   {
-    case RETURN_ABS_POSITION: returnAbsPosition(); break; //return absolute position of encoder, 1 byte
-    case SET_HOME: //set relative homepoint of encoder to sent position
-      encoder.update(); 
-      encoder.setHome(Wire.read()); 
-      break; 
-    case RETURN_REL_POSITION: returnRelPosition(); break; // return relative position to home
+    case (int) RETURN_ABS_POSITION: returnAbsPosition(); break; //return absolute position of encoder, 1 byte
+    case (int) SET_HOME: encoder.update(); encoder.setHome(Wire.read()); break; //set relative homepoint of encoder to sent position
+    case (int) RETURN_REL_POSITION: returnRelPosition(); break; // return relative position to home
   }
 }
 
 void returnAbsPosition()
 {
-  Wire.write(encoder.getPosAbs());
+  Wire.write(::encoder.getPosAbs());
 }
 
 void returnRelPosition()
 {
-  Wire.write(encoder.getPosRel());
+  Wire.write(::encoder.getPosRel());
 }
