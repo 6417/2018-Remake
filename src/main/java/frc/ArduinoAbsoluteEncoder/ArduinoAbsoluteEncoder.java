@@ -5,11 +5,16 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.Arduino;
+package frc.ArduinoAbsoluteEncoder;
 
 import edu.wpi.first.wpilibj.I2C;
 
 public class ArduinoAbsoluteEncoder {
+    public static class Request {
+        public static final byte GET_ABS_POSITION = 0x00;
+        public static final byte SET_HOME = 0x01;
+        public static final byte GET_REL_POSITION = 0x02;
+    }
     private I2C device;
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C 
@@ -28,19 +33,30 @@ public class ArduinoAbsoluteEncoder {
      * @return
      * Returns true if transfer was successfull
      */
-    public boolean setHome() {
-        byte[] buffer = new byte[1];
-        return !device.read(0x01, 1, buffer);
+    public boolean setHome(byte pos) {
+        return !device.write(Request.SET_HOME, pos);
     }
 
     /**
      * @return
-     * Returns the current position of the encoder. 
+     * Returns the current absolute position of the encoder. 
      * Returns -1 if the transfer wasn't successfull.
      */
-    public byte getPosition() {
+    public byte getAbsPosition() {
         byte[] buffer = new byte[1];
-        if (device.read(0x00, 1, buffer))
+        if (device.read(Request.GET_ABS_POSITION, 1, buffer))
+            return -1;
+        return buffer[0];
+    }    
+    
+    /**
+     * @return
+     * Returns the current relative position of the encoder to the home point. 
+     * Returns -1 if the transfer wasn't successfull.
+     */
+    public byte getRelPosition() {
+        byte[] buffer = new byte[1];
+        if (device.read(Request.GET_REL_POSITION, 1, buffer))
             return -1;
         return buffer[0];
     }
