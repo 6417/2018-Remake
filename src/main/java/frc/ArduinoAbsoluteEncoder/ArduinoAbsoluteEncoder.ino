@@ -16,11 +16,16 @@ uint16_t ledCounter1 = 0;
 uint16_t ledCounter2 = 0;
 byte registerRequest = 0x00;
 
+enum Rquest {
+  RETURN_ABS_POSITION = 0x00,
+  SET_HOME = 0x01,
+  RETURN_REL_POSITION = 0x02
+}
+
 //functions for code
 void receiveEvent();
 void requestEvent();
-void returnPosition();
-void manageLed();
+void returnAbsPosition();
 
 Encoder8bit encoder(6, 7, 8, 9, 2, 3, 4, 5);
 
@@ -32,12 +37,6 @@ void setup()
     pinMode(dipSwitchPins[i], INPUT);
     adress = adress | digitalRead(dipSwitchPins[i]) << i;
   }
-  if(adress == 0)
-  {
-    ledState = 1;
-  }
-  pinMode(ledPinRed, OUTPUT);
-  pinMode(ledPinGreen, OUTPUT);
 
   //begin I2C communication
   Wire.begin(adress);
@@ -50,9 +49,7 @@ void setup()
 
 void loop()
 {
-  encoder.update();
-  manageLed();
-  
+  encoder.update();  
   delayMicroseconds(10);
 }
 
@@ -69,50 +66,23 @@ void receiveEvent()//on receive event save requested register
 void requestEvent()//on request event transmit requested data
 {
   Serial.println("master requested response");
-  switch(registerRequest)
+  switch((Request) registerRequest)
   {
-    case 0x00: returnPosition(); break; //return absolute position of encoder, 1 byte
-    case 0x01: encoder.update(); encoder.setHome(); break; //set relative homepoint of encoder
-    case 0X02: prevLedState = ledState; ledState = 2; break; // blink led
+    case RETURN_ABS_POSITION: returnAbsPosition(); break; //return absolute position of encoder, 1 byte
+    case SET_HOME: //set relative homepoint of encoder to sent position
+      encoder.update(); 
+      encoder.setHome(Wire.read()); 
+      break; 
+    case RETURN_REL_POSITION: returnRelPosition(); break; // return relative position to home
   }
 }
 
-void returnPosition()
+void returnAbsPosition()
 {
   Wire.write(encoder.getPosAbs());
 }
 
-void manageLed()
+void returnRelPosition()
 {
-  switch(ledState)
-  {
-    case 0:
-      ledGreenState = true;
-      ledRedState = false;
-      break;
-    case 1:
-      ledGreenState = false;
-      ledRedState = true;
-      break;
-    case 2:
-      ledState = 3;
-      ledCounter1 = 0;
-      ledCounter2 = 0;
-      ledRedState = true;
-    case 3:
-      if(ledCounter1 > 1000)
-      {
-        ledCounter1 = 0;
-        ledCounter2++;
-        ledGreenState = !ledGreenState;
-      }
-      if(ledCounter2 > 10)
-      {
-        ledState = prevLedState;
-      }
-      ledCounter1++;
-      break;
-  }
-  digitalWrite(ledPinGreen, ledGreenState);
-  digitalWrite(ledPinRed, ledRedState);
+  Wire.write(encoder.getPosRel());
 }
