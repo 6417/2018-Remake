@@ -105,7 +105,7 @@ public class PIDConfig {
 
 		protected void setStatusFramePeriods(WPI_TalonSRX motor) {
 			for (StatusFrameEnhanced k : statusFramePeriods.keySet())
-				motor.setStatusFramePeriod(k, statusFramePeriods.get(k));
+				motor.setStatusFramePeriod(k, statusFramePeriods.get(k), Constants.timeOut);
 		}
 
 		protected void configLoopRamps(WPI_TalonSRX motor) {

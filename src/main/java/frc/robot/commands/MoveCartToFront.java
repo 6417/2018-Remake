@@ -27,7 +27,7 @@ public class MoveCartToFront extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID.tolerance >= Constants.Cart.driveLenght
-				&& Cart.getInstance().getEncoderTicks() - Constants.Cart.PID.tolerance <= Constants.Cart.driveLenght;
+		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID_Tolerance >= Constants.Cart.driveLenght
+				&& Cart.getInstance().getEncoderTicks() - Constants.Cart.PID_Tolerance <= Constants.Cart.driveLenght;
 	}
 }

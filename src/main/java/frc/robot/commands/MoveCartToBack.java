@@ -27,6 +27,6 @@ public class MoveCartToBack extends CommandBase {
 
 	@Override
 	public boolean isFinished() {
-		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID.tolerance >= 0 && Cart.getInstance().getEncoderTicks() - Constants.Cart.PID.tolerance <= 0;
+		return Cart.getInstance().getEncoderTicks() + Constants.Cart.PID_Tolerance >= 0 && Cart.getInstance().getEncoderTicks() - Constants.Cart.PID_Tolerance <= 0;
 	}
 }
