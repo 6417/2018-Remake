@@ -77,12 +77,12 @@ public class PIDConfig {
 			configSpeeds(motor);
 		}
 
-		private void configSpeeds(WPI_TalonSRX motor) {
+		protected void configSpeeds(WPI_TalonSRX motor) {
 			motor.configMotionCruiseVelocity(cruiseVelocity, Constants.timeOut);
             motor.configMotionAcceleration(acceleration, Constants.timeOut);
 		}
 
-		private void configPIDConstants(WPI_TalonSRX motor) {
+		protected void configPIDConstants(WPI_TalonSRX motor) {
 			motor.selectProfileSlot(slotIdx, pidIdx);
             motor.config_kP(slotIdx, kP, Constants.timeOut);
             motor.config_kI(slotIdx, kI, Constants.timeOut);
@@ -91,24 +91,24 @@ public class PIDConfig {
 			configAllowableClosedloopError(motor);
 		}
 
-		private void configAllowableClosedloopError(WPI_TalonSRX motor) {
+		protected void configAllowableClosedloopError(WPI_TalonSRX motor) {
 			if (allowableClosedloopError.isPresent())
             	motor.configAllowableClosedloopError(slotIdx, allowableClosedloopError.get(), Constants.timeOut);
 		}
 
-		private void configOutputs(WPI_TalonSRX motor) {
+		protected void configOutputs(WPI_TalonSRX motor) {
 			motor.configNominalOutputForward(nominalOutputForward, Constants.timeOut);
             motor.configNominalOutputReverse(nominalOutputReverse, Constants.timeOut);
             motor.configPeakOutputForward(peakOutputForward, Constants.timeOut);
             motor.configPeakOutputReverse(peakOutputReverse, Constants.timeOut);
 		}
 
-		private void setStatusFramePeriods(WPI_TalonSRX motor) {
+		protected void setStatusFramePeriods(WPI_TalonSRX motor) {
 			for (StatusFrameEnhanced k : statusFramePeriods.keySet())
 				motor.setStatusFramePeriod(k, statusFramePeriods.get(k));
 		}
 
-		private void configLoopRamps(WPI_TalonSRX motor) {
+		protected void configLoopRamps(WPI_TalonSRX motor) {
 			if (openloopRamp.isPresent())
 				motor.configOpenloopRamp(openloopRamp.get());			
 			if (closedloopRamp.isPresent())
@@ -116,7 +116,18 @@ public class PIDConfig {
 		}
 	}
 
+	/**
+	 * PIDFConfigurator class wich configures the PIDF off a WPI_TalonSRX
+	 * @see
+	 * For full documentation have a look at the docs of {@link PIDConfig #PIDConfigurator}
+	 */
 	public static class PIDFConfigurator extends PIDConfigurator {
 		public double kF;
+
+		@Override
+		protected void configPIDConstants(WPI_TalonSRX motor) {
+			super.configPIDConstants(motor);
+			motor.config_kF(slotIdx, kF, Constants.timeOut);
+		}
 	}
 }
