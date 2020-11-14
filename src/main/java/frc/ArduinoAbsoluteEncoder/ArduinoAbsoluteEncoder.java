@@ -18,6 +18,9 @@ public class ArduinoAbsoluteEncoder {
 
     private boolean inverted = false;
     private I2C device;
+    public static final int maxTicks = 127;
+    public static final int minTicks = 0;
+    private double distancePerPulse = 1.0;
 
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C
@@ -47,28 +50,32 @@ public class ArduinoAbsoluteEncoder {
      * @return Returns the current absolute position of the encoder. Returns -1 if
      *         the transfer wasn't successfull.
      */
-    public int getAbsPosition() {
+    public double getAbsPosition() {
         byte[] buffer = new byte[1];
         if (device.read(Request.GET_ABS_POSITION, 1, buffer))
             return -1;
         if (!inverted)
-            return buffer[0];
+            return buffer[0] * distancePerPulse;
         else
-            return 127 - buffer[0];
+            return (maxTicks - buffer[0]) * distancePerPulse;
     }
 
     /**
      * @return Returns the current relative position of the encoder to the home
      *         point. Returns -1 if the transfer wasn't successfull.
      */
-    public int getRelPosition() {
+    public double getRelPosition() {
         byte[] buffer = new byte[1];
         if (device.read(Request.GET_REL_POSITION, 1, buffer))
             return -1;
 
         if (!inverted)
-            return buffer[0];
+            return buffer[0] * distancePerPulse;
         else
-            return 127 - buffer[0];
+            return (maxTicks - buffer[0]) * distancePerPulse;
+    }
+
+    public void setDistancePerPulse(double distance) {
+        distancePerPulse = distance;
     }
 }

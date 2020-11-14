@@ -18,6 +18,7 @@ import frc.robot.commands.MoveLiftingUnitTo;
 import frc.robot.commands.ResetCommand;
 
 public class RobotContainer {
+	private static RobotContainer instance = null;
 	public Joystick joystickDrive = new Joystick(Constants.Joystick.drivePort);
 	public Joystick joystickControll = new Joystick(Constants.Joystick.controllPort);
 
@@ -44,8 +45,14 @@ public class RobotContainer {
 	private JoystickButton moveLiftingUnitToBottomButton = new JoystickButton(joystickControll,
 			Constants.LiftingUnit.moveLiftingUnitToBottomButtonId);
 
-	public RobotContainer() {
+	private RobotContainer() {
 		configureButtonBindings();
+	}
+
+	public static RobotContainer getInstance() {
+		if (instance == null)
+			instance = new RobotContainer();
+		return instance;
 	}
 
 	private void configureButtonBindings() {
@@ -72,5 +79,17 @@ public class RobotContainer {
 	private void configureGripperButtonBindings() {
 		gripperBackwardButton.whileHeld(new GripperBackwards());
 		gripperForwardButton.whileHeld(new GripperForward());
+	}
+
+	public double getDriveJoystickX() {
+		return joystickDrive.getX();
+	}
+
+	public double getDriveJoystickY() {
+		return joystickDrive.getY();
+	}
+
+	public double getDriveJoystickZ() {
+		return joystickDrive.getZ();
 	}
 }

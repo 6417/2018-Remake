@@ -13,6 +13,9 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import frc.robot.subsystems.SwerveModule;
+
 public class Motors {
     public static class Gripper {
 
@@ -86,7 +89,7 @@ public class Motors {
         }
 
         private static void initPID() {
-            Constants.Cart.PID.configMotor(master);            
+            Constants.Cart.PID.configMotor(master);
             master.setSensorPhase(true);
         }
 
@@ -124,28 +127,37 @@ public class Motors {
     }
 
     public static class SwerveDrive {
-        public static WPI_TalonSRX frontLeftMotorVelocity;
-        public static WPI_TalonSRX frontRightMotorVelocity;
-        public static WPI_TalonSRX backRightMotorVelocity;
-        public static WPI_TalonSRX backLeftMotorVelocity;
-        public static WPI_TalonSRX frontLeftMotorRotation;
-        public static WPI_TalonSRX frontRightMotorRotation;
-        public static WPI_TalonSRX backRightMotorRotation;
-        public static WPI_TalonSRX backLeftMotorRotation;
+        public static SwerveModule frontLeftModule;
+        public static SwerveModule frontRightModule;
+        public static SwerveModule backRightModule;
+        public static SwerveModule backLeftModule;
+
+        public static SwerveDriveKinematics kinematics;
 
         public static void init() {
             constructMotors();
         }
 
         private static void constructMotors() {
-            frontLeftMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.frontLeftMotorVelocityId);
-            frontRightMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.frontRightMotorVelocityId);
-            backRightMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.backRightMotorVelocityId);
-            backLeftMotorVelocity = new WPI_TalonSRX(Constants.SwerveDrive.backLeftMotorVelocityId);
-            frontLeftMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.frontLeftMotorRotationId);
-            frontRightMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.frontRightMotorRotationId);
-            backRightMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.backRightMotorRotationId);
-            backLeftMotorRotation = new WPI_TalonSRX(Constants.SwerveDrive.backLeftMotorRotationId);
+            frontLeftModule = new SwerveModule(Constants.SwerveDrive.frontLeftMotorRotationId,
+                    Constants.SwerveDrive.frontLeftMotorSpeedId, Constants.SwerveDrive.frontLeftEncoderRotationPort,
+                    Constants.SwerveDrive.frontLeftEncoderRotationDeviceAdress,
+                    Constants.SwerveDrive.frontLeftModuleLocation, Constants.SwerveDrive.pidConst);
+            frontRightModule = new SwerveModule(Constants.SwerveDrive.frontRightMotorRotationId,
+                    Constants.SwerveDrive.frontRightMotorSpeedId, Constants.SwerveDrive.frontRightEncoderRotationPort,
+                    Constants.SwerveDrive.frontRightEncoderRotationDeviceAdress,
+                    Constants.SwerveDrive.frontRightModuleLocation, Constants.SwerveDrive.pidConst);
+            backRightModule = new SwerveModule(Constants.SwerveDrive.backRightMotorRotationId,
+                    Constants.SwerveDrive.backRightMotorSpeedId, Constants.SwerveDrive.backRightEncoderRotationPort,
+                    Constants.SwerveDrive.backRightEncoderRotationDeviceAdress,
+                    Constants.SwerveDrive.backRightModuleLocation, Constants.SwerveDrive.pidConst);
+            backLeftModule = new SwerveModule(Constants.SwerveDrive.backLeftMotorRotationId,
+                    Constants.SwerveDrive.backLeftMotorSpeedId, Constants.SwerveDrive.backLeftEncoderRotationPort,
+                    Constants.SwerveDrive.backLeftEncoderRotationDeviceAdress,
+                    Constants.SwerveDrive.backLeftModuleLocation, Constants.SwerveDrive.pidConst);
+
+            kinematics = new SwerveDriveKinematics(frontLeftModule.location, frontRightModule.location,
+                    backLeftModule.location, backRightModule.location);
         }
     }
 

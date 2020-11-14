@@ -7,7 +7,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.robot.subsystems.SwerveModule;
 
 import java.util.Optional;
 
@@ -53,7 +55,7 @@ public final class Constants {
                 kP = 0.8;
                 kI = 0;
                 kD = 80;
-                
+
                 statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10);
                 statusFramePeriods.put(StatusFrameEnhanced.Status_13_Base_PIDF0, 10);
                 integralZone = 500;
@@ -114,14 +116,43 @@ public final class Constants {
     public static class SwerveDrive {
         public static final boolean isSubsystemEnabled = true;
 
-        public static final int frontLeftMotorVelocityId = 0;
-        public static final int frontRightMotorVelocityId = 0;
-        public static final int backRightMotorVelocityId = 0;
-        public static final int backLeftMotorVelocityId = 0;        
-        
+        public static final int frontLeftMotorSpeedId = 0;
+        public static final int frontRightMotorSpeedId = 0;
+        public static final int backRightMotorSpeedId = 0;
+        public static final int backLeftMotorSpeedId = 0;
+
         public static final int frontLeftMotorRotationId = 0;
         public static final int frontRightMotorRotationId = 0;
         public static final int backRightMotorRotationId = 0;
         public static final int backLeftMotorRotationId = 0;
+
+        public static final I2C.Port frontLeftEncoderRotationPort = I2C.Port.kOnboard;
+        public static final I2C.Port frontRightEncoderRotationPort = I2C.Port.kOnboard;
+        public static final I2C.Port backRightEncoderRotationPort = I2C.Port.kOnboard;
+        public static final I2C.Port backLeftEncoderRotationPort = I2C.Port.kOnboard;
+
+        public static final Translation2d frontLeftModuleLocation = new Translation2d(0.0, 0.0);
+        public static final Translation2d frontRightModuleLocation = new Translation2d(0.0, 0.0);
+        public static final Translation2d backRightModuleLocation = new Translation2d(0.0, 0.0);
+        public static final Translation2d backLeftModuleLocation = new Translation2d(0.0, 0.0);
+
+        public static final int frontLeftEncoderRotationDeviceAdress = 0;
+        public static final int frontRightEncoderRotationDeviceAdress = 0;
+        public static final int backRightEncoderRotationDeviceAdress = 0;
+        public static final int backLeftEncoderRotationDeviceAdress = 0;
+
+        public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants() {
+            {
+                kF = 0.0;
+                kP = 0.0;
+                kI = 0.0;
+                kD = 0.0;
+                kS = 0.0;
+                kV = 0.0;
+
+                acceleration = 0.0;
+                cruiseVelocity = 0.0;
+            }
+        };
     }
 }
