@@ -14,6 +14,8 @@ uint16_t ledCounter1 = 0;
 uint16_t ledCounter2 = 0;
 byte registerRequest = 0x00;
 
+long lastMillis = 0;
+
 enum Rquest {
   RETURN_ABS_POSITION = 0x00,
   SET_HOME = 0x01,
@@ -33,8 +35,9 @@ void setup()
   for(int i = 0; i < 4; i++)
   {
     pinMode(dipSwitchPins[i], INPUT);
-    adress = adress | digitalRead(dipSwitchPins[i]) << i;
+    // adress = adress | digitalRead(dipSwitchPins[i]) << i;    
   }
+  adress = 5;
 
   //begin I2C communication
   Wire.begin(adress);
@@ -42,13 +45,28 @@ void setup()
   Wire.onRequest(requestEvent);
 
   //begin Serial communication
-  Serial.begin(115200);
+  Serial.begin(9600);
+
+  pinMode(12, OUTPUT);
 }
 
 void loop()
 {
   encoder.update();  
   delayMicroseconds(10);
+
+  if(millis() > lastMillis + 1000)
+  {
+    lastMillis = millis();
+    ledState = !ledState;
+    digitalWrite(12, ledState);
+  }
+
+  if(Serial.available())
+  {
+    Serial.println(Serial.read());
+  }
+  
 }
 
 void receiveEvent()//on receive event save requested register
@@ -58,6 +76,7 @@ void receiveEvent()//on receive event save requested register
     registerRequest = Wire.read();
     Serial.print("requested register: ");
     Serial.println(registerRequest);
+    
   }
 }
 
