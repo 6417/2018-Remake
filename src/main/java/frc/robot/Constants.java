@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.SwerveModule;
 
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -25,7 +26,7 @@ public final class Constants {
     }
 
     public static class Gripper {
-        public static final boolean isSubsystemEnabled = true;
+        public static final boolean isSubsystemEnabled = false;
         public static final int leftId = 13;
         public static final int rightId = 1;
         public static final double motorSpeed = 0.5;
@@ -46,33 +47,33 @@ public final class Constants {
 
         public static final int PID_Tolerance = 500;
 
-        public static PIDConfig.PIDFConfigurator PID = new PIDConfig.PIDFConfigurator() {
-            {
-                openloopRamp = Optional.of(1.0);
-                closedloopRamp = Optional.of(0.0);
+        public static final PIDConfig.PIDFConfigurator PID = new PIDConfig.PIDFConfigurator();
+        static {
+            PID.openloopRamp = Optional.of(1.0);
+            PID.closedloopRamp = Optional.of(0.0);
 
-                kF = 0.0465;
-                kP = 0.8;
-                kI = 0;
-                kD = 80;
+            PID.kF = 0.0465;
+            PID.kP = 0.8;
 
-                statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10);
-                statusFramePeriods.put(StatusFrameEnhanced.Status_13_Base_PIDF0, 10);
-                integralZone = 500;
-                acceleration = 22000;
-                cruiseVelocity = 11000;
-                nominalOutputForward = 0;
-                nominalOutputReverse = 0;
-                peakOutputForward = 1;
-                peakOutputReverse = -1;
-                pidIdx = 0;
-                slotIdx = 0;
-            }
-        };
+            PID.kI = 0;
+            PID.kD = 80;
+
+            PID.statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10);
+            PID.statusFramePeriods.put(StatusFrameEnhanced.Status_13_Base_PIDF0, 10);
+            PID.integralZone = 500;
+            PID.acceleration = 22000;
+            PID.cruiseVelocity = 11000;
+            PID.nominalOutputForward = 0;
+            PID.nominalOutputReverse = 0;
+            PID.peakOutputForward = 1;
+            PID.peakOutputReverse = -1;
+            PID.pidIdx = 0;
+            PID.slotIdx = 0;
+        }
     }
 
     public static class LiftingUnit {
-        public static final boolean isSubsystemEnabled = true;
+        public static final boolean isSubsystemEnabled = false;
 
         public static final int masterId = 12;
         public static final int followerId = 9;
@@ -89,32 +90,31 @@ public final class Constants {
         public static final int moveLiftingUnitToSwitchButtonId = 9;
         public static final int moveLiftingUnitToBottomButtonId = 10;
         public static final int PID_Tolerance = 200;
-        public static PIDConfig.PIDFConfigurator PID = new PIDConfig.PIDFConfigurator() {
-            {
-                pidIdx = 0;
-                slotIdx = 0;
-                statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10);
-                statusFramePeriods.put(StatusFrameEnhanced.Status_13_Base_PIDF0, 10);
-                nominalOutputForward = 0;
-                nominalOutputReverse = 0;
-                peakOutputForward = 1;
-                peakOutputReverse = -1;
+        public static final PIDConfig.PIDFConfigurator PID = new PIDConfig.PIDFConfigurator();
+        static {
+            PID.pidIdx = 0;
+            PID.slotIdx = 0;
+            PID.statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10);
+            PID.statusFramePeriods.put(StatusFrameEnhanced.Status_13_Base_PIDF0, 10);
+            PID.nominalOutputForward = 0;
+            PID.nominalOutputReverse = 0;
+            PID.peakOutputForward = 1;
+            PID.peakOutputReverse = -1;
 
-                kF = 0.8525;
-                kP = 1.2;
-                kI = 0.0;
-                kD = 18.0;
+            PID.kF = 0.8525;
+            PID.kP = 1.2;
+            PID.kI = 0.0;
+            PID.kD = 18.0;
 
-                integralZone = 200;
-                allowableClosedloopError = Optional.of(30);
-                cruiseVelocity = 5333;
-                acceleration = 4000;
-            }
-        };
+            PID.integralZone = 200;
+            PID.allowableClosedloopError = Optional.of(30);
+            PID.cruiseVelocity = 5333;
+            PID.acceleration = 4000;
+        }
     }
 
     public static class SwerveDrive {
-        public static final boolean isSubsystemEnabled = true;
+        public static final boolean isSubsystemEnabled = false;
 
         public static final int frontLeftMotorSpeedId = 0;
         public static final int frontRightMotorSpeedId = 0;
@@ -141,18 +141,17 @@ public final class Constants {
         public static final int backRightEncoderRotationDeviceAdress = 0;
         public static final int backLeftEncoderRotationDeviceAdress = 0;
 
-        public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants() {
-            {
-                kF = 0.0;
-                kP = 0.0;
-                kI = 0.0;
-                kD = 0.0;
-                kS = 0.0;
-                kV = 0.0;
+        public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
+            static {
+               pidConst.kF = 0.0;
+               pidConst.kP = 0.0;
+               pidConst.kI = 0.0;
+               pidConst.kD = 0.0;
+               pidConst.kS = 0.0;
+               pidConst.kV = 0.0;
 
-                acceleration = 0.0;
-                cruiseVelocity = 0.0;
+               pidConst.acceleration = 0.0;
+               pidConst.cruiseVelocity = 0.0;
             }
-        };
     }
 }

@@ -9,12 +9,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 public class PIDConfig {
 	/**
 	 * <h> PIDConfigurator class wich configures the PID off a WPI_TalonSRX </h>
-	 * 
-	 * @see
-	 * <p>
-	 * 	Please use the Double-Brace initialization, like in the example above the class definition, to keep
-	 * 	it straightforward.
-	 * </p>
 	 * @see
 	 * <p>
 	 * 	You have to set all non optional values or the defualt will be used. If
@@ -22,23 +16,6 @@ public class PIDConfig {
 	 * 	function won't be called
 	 * </p>
 	 */
-
-	/* Example:
-
-	* WPI_TalonSRX myTalonSRX = new WPI_TalonSRX(0);
-	* PIDConfig.PIDConfigurator myPIDConfigurator= new PIDConfig.PIDConfigurator() {{
-	* 	statusFramePeriods.put(StatusFrameEnhanced.Status_10_MotionMagic, 10); // use "statusFramePeriods.put(<StatusFrameEnhanced>, <value>)" to set the statusFramePeriod <StatusFrameEnhanced>
-	* 	kP = 1.0;
-	* 	kI = 2.0;
-	* 	kD = 3.0;
-	* 	
-	* // ...
-	* 	
-	* 	allowableClosedloopError = Optional.of(0); // use "= Optional.of(<yourVlaue>)" to set allowableClosedloopError and other all other optional parameters.
-	* }};
-	* myPIDConfigurator.configMotor(myTalonSRX);
-	*
-	*/
 
 	public static class PIDConfigurator {
 		public LinkedHashMap<StatusFrameEnhanced, Integer> statusFramePeriods;
@@ -63,6 +40,13 @@ public class PIDConfig {
 		public Optional<Integer> allowableClosedloopError;
 		public Optional<Double> openloopRamp;
 		public Optional<Double> closedloopRamp;
+
+		protected PIDConfigurator() {
+			statusFramePeriods = new LinkedHashMap<StatusFrameEnhanced, Integer>();
+			allowableClosedloopError = Optional.empty();
+			openloopRamp = Optional.empty();
+			closedloopRamp = Optional.empty();
+		}
 
 		/**
 		 * Configures the given motor with the specified settings from this class.

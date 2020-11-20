@@ -54,8 +54,8 @@ public class Motors {
             if (Constants.Cart.isSubsystemEnabled) {
                 initMotor();
                 initLimitSwitches();
-                Constants.Cart.PID.configMotor(motor);
                 initEncoder();
+                Constants.Cart.PID.configMotor(motor);
             }
         }
 
