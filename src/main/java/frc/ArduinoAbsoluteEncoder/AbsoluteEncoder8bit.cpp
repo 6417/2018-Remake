@@ -114,3 +114,8 @@ void Encoder8bit::setHome(uint8_t pos)
 {
   _home = pos;
 }
+
+uint8_t Encoder8bit::getHome()
+{
+  return _home;
+}
