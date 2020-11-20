@@ -26,6 +26,7 @@ class Encoder8bit
   void update();    //encoder calculates new absolute and relative position
   void setHome();   //set homepoint for relative position
   void setHome(uint8_t pos); //set homepoint to specified position
+  uint8_t getHome(); // get homepoint
   int getPosAbs();  //get absolute position value. integer value from 0-127
   float getDegAbs();  //get absolute position value in degrees. float value from 0-360
   float getRadAbs();  //get absolute position value in radians. float value flom 0-2xPI
@@ -40,7 +41,7 @@ class Encoder8bit
   static const int _conversionTable[256]; //array for convesion from gray code to binary
   int _encoderPosAbs; //integer to save absolute encoder position
   int _encoderPosRel; //integer to save relative encoder position
-  int _home;      //integer to save homepoint
+  uint8_t _home;      //integer to save homepoint
 };
 
 #endif
