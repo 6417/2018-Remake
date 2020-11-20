@@ -35,7 +35,7 @@ public final class Constants {
     }
 
     public static class Cart {
-        public static final boolean isSubsystemEnabled = true;
+        public static final boolean isSubsystemEnabled = false;
         public static final int motorId = 3;
         public static final int driveLenght = 858600;
         public static final int centerPos = 450000;
