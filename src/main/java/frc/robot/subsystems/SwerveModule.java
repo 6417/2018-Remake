@@ -25,13 +25,13 @@ public class SwerveModule {
 
     private WPI_TalonSRX motorRotation;
     private WPI_TalonSRX motorSpeed;
-    private ArduinoAbsoluteEncoder encoder;
+    public ArduinoAbsoluteEncoder encoder;
     public Translation2d location;
     private ProfiledPIDController pid;
     private SimpleMotorFeedforward rotationFeedforward;
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
-            Translation2d location, PIDConstants pidConstants) {
+            Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
         motorRotation = new WPI_TalonSRX(roationId);
         motorSpeed = new WPI_TalonSRX(speedId);
 
@@ -44,6 +44,7 @@ public class SwerveModule {
         rotationFeedforward = new SimpleMotorFeedforward(pidConstants.kS, pidConstants.kV);
 
         encoder.setDistancePerPulse(2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks);
+        encoder.setHome(encoderHomePoint);
     }
 
     public void setDesiredState(SwerveModuleState state) {

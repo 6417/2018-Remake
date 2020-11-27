@@ -139,22 +139,27 @@ public class Motors {
         }
 
         private static void constructMotors() {
-            frontLeftModule = new SwerveModule(Constants.SwerveDrive.frontLeftMotorRotationId,
-                    Constants.SwerveDrive.frontLeftMotorSpeedId, Constants.SwerveDrive.frontLeftEncoderRotationPort,
-                    Constants.SwerveDrive.frontLeftEncoderRotationDeviceAdress,
-                    Constants.SwerveDrive.frontLeftModuleLocation, Constants.SwerveDrive.pidConst);
-            frontRightModule = new SwerveModule(Constants.SwerveDrive.frontRightMotorRotationId,
-                    Constants.SwerveDrive.frontRightMotorSpeedId, Constants.SwerveDrive.frontRightEncoderRotationPort,
-                    Constants.SwerveDrive.frontRightEncoderRotationDeviceAdress,
-                    Constants.SwerveDrive.frontRightModuleLocation, Constants.SwerveDrive.pidConst);
-            backRightModule = new SwerveModule(Constants.SwerveDrive.backRightMotorRotationId,
-                    Constants.SwerveDrive.backRightMotorSpeedId, Constants.SwerveDrive.backRightEncoderRotationPort,
-                    Constants.SwerveDrive.backRightEncoderRotationDeviceAdress,
-                    Constants.SwerveDrive.backRightModuleLocation, Constants.SwerveDrive.pidConst);
-            backLeftModule = new SwerveModule(Constants.SwerveDrive.backLeftMotorRotationId,
-                    Constants.SwerveDrive.backLeftMotorSpeedId, Constants.SwerveDrive.backLeftEncoderRotationPort,
-                    Constants.SwerveDrive.backLeftEncoderRotationDeviceAdress,
-                    Constants.SwerveDrive.backLeftModuleLocation, Constants.SwerveDrive.pidConst);
+            frontLeftModule = new SwerveModule(Constants.SwerveDrive.Front.Left.motorRotationId,
+                    Constants.SwerveDrive.Front.Left.motorSpeedId, Constants.SwerveDrive.Front.Left.encoderRotationPort,
+                    Constants.SwerveDrive.Front.Left.encoderRotationDeviceAdress,
+                    Constants.SwerveDrive.Front.Left.moduleLocation, Constants.SwerveDrive.pidConst,
+                    Constants.SwerveDrive.Front.Right.homePoint);
+            frontRightModule = new SwerveModule(Constants.SwerveDrive.Front.Right.motorRotationId,
+                    Constants.SwerveDrive.Front.Right.motorSpeedId,
+                    Constants.SwerveDrive.Front.Right.encoderRotationPort,
+                    Constants.SwerveDrive.Front.Right.encoderRotationDeviceAdress,
+                    Constants.SwerveDrive.Front.Right.moduleLocation, Constants.SwerveDrive.pidConst,
+                    Constants.SwerveDrive.Front.Right.homePoint);
+            backRightModule = new SwerveModule(Constants.SwerveDrive.Back.Right.motorRotationId,
+                    Constants.SwerveDrive.Back.Right.motorSpeedId, Constants.SwerveDrive.Back.Right.encoderRotationPort,
+                    Constants.SwerveDrive.Back.Right.encoderRotationDeviceAdress,
+                    Constants.SwerveDrive.Back.Right.moduleLocation, Constants.SwerveDrive.pidConst,
+                    Constants.SwerveDrive.Back.Right.homePoint);
+            backLeftModule = new SwerveModule(Constants.SwerveDrive.Back.Left.motorRotationId,
+                    Constants.SwerveDrive.Back.Left.motorSpeedId, Constants.SwerveDrive.Back.Left.encoderRotationPort,
+                    Constants.SwerveDrive.Back.Left.encoderRotationDeviceAdress,
+                    Constants.SwerveDrive.Back.Left.moduleLocation, Constants.SwerveDrive.pidConst,
+                    Constants.SwerveDrive.Back.Left.homePoint);
 
             kinematics = new SwerveDriveKinematics(frontLeftModule.location, frontRightModule.location,
                     backLeftModule.location, backRightModule.location);

@@ -114,39 +114,55 @@ public final class Constants {
     }
 
     public static class SwerveDrive {
-        public static final boolean isSubsystemEnabled = false;
+        public static final boolean isSubsystemEnabled = true;
 
-        public static final int frontLeftMotorSpeedId = 0;
-        public static final int frontRightMotorSpeedId = 0;
-        public static final int backRightMotorSpeedId = 0;
-        public static final int backLeftMotorSpeedId = 0;
+        public static class Front {
+            public static class Right {
+                public static final int motorRotationId = 4;
+                public static final int motorSpeedId = 7;
+                public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
+                public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
+                public static final int encoderRotationDeviceAdress = 1;
+                public static final byte homePoint = 0;
+            }
+            
+            public static class Left {
+                public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
+                public static final int motorSpeedId = 6;
+                public static final int motorRotationId = 5;
+                public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
+                public static final int encoderRotationDeviceAdress = 4;
+                public static final byte homePoint = 0;
+            }
+        }        
+        
+        public static class Back {
+            public static class Right {
+                public static final int motorSpeedId = 11;
+                public static final int motorRotationId = 2;
+                public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
+                public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
+                public static final int encoderRotationDeviceAdress = 2;
+                public static final byte homePoint = 0;
+            }
 
-        public static final int frontLeftMotorRotationId = 0;
-        public static final int frontRightMotorRotationId = 0;
-        public static final int backRightMotorRotationId = 0;
-        public static final int backLeftMotorRotationId = 0;
-
-        public static final I2C.Port frontLeftEncoderRotationPort = I2C.Port.kOnboard;
-        public static final I2C.Port frontRightEncoderRotationPort = I2C.Port.kOnboard;
-        public static final I2C.Port backRightEncoderRotationPort = I2C.Port.kOnboard;
-        public static final I2C.Port backLeftEncoderRotationPort = I2C.Port.kOnboard;
-
-        public static final Translation2d frontLeftModuleLocation = new Translation2d(0.0, 0.0);
-        public static final Translation2d frontRightModuleLocation = new Translation2d(0.0, 0.0);
-        public static final Translation2d backRightModuleLocation = new Translation2d(0.0, 0.0);
-        public static final Translation2d backLeftModuleLocation = new Translation2d(0.0, 0.0);
-
-        public static final int frontLeftEncoderRotationDeviceAdress = 0;
-        public static final int frontRightEncoderRotationDeviceAdress = 0;
-        public static final int backRightEncoderRotationDeviceAdress = 0;
-        public static final int backLeftEncoderRotationDeviceAdress = 0;
+            public static class Left {
+                public static final int motorSpeedId = 8;
+                public static final int motorRotationId = 10;
+                public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
+                public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
+                public static final int encoderRotationDeviceAdress = 3;
+                public static final byte homePoint = 106
+                ;
+            }
+        }
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
                pidConst.kF = 0.0;
-               pidConst.kP = 0.0;
+               pidConst.kP = -3.875;
                pidConst.kI = 0.0;
-               pidConst.kD = 0.0;
+               pidConst.kD = 0.035;
                pidConst.kS = 0.0;
                pidConst.kV = 0.0;
 
