@@ -1,7 +1,7 @@
 /*
-Autor:    Tim Koelbl
-Datum:    16.06.2020
-Version:  1.0.1
+Autor:    Tim Koelbl, Alex Krieg
+Datum:    12.12.2020
+Version:  1.2.0
 */
 
 #include "Arduino.h"
@@ -37,9 +37,15 @@ const int Encoder8bit::_conversionTable[256] =
     79, 80, 97, 96, 112, 256 //25
   };
 
-Encoder8bit::Encoder8bit(int p0, int p1, int p2, int p3, int p4, int p5, int p6, int p7)
+Encoder8bit::Encoder8bit(volatile uint8_t *encoderPort,
+						 volatile uint8_t *encoderPinModePort)
 {
-  _pins[0] = p0;
+	
+	_encoderPort = encoderPinModePort;
+	
+	// Set all pins on the register to input pins
+	*encoderPinModePort = 0x0;
+  /*_pins[0] = p0;
   _pins[1] = p1;
   _pins[2] = p2;
   _pins[3] = p3;
@@ -52,7 +58,7 @@ Encoder8bit::Encoder8bit(int p0, int p1, int p2, int p3, int p4, int p5, int p6,
   {
     pinMode(_pins[i], INPUT);
   }
-  
+  */
   _encoderPosAbs = 0;
   _encoderPosRel = 0;
   _home = 0;
@@ -61,12 +67,23 @@ Encoder8bit::Encoder8bit(int p0, int p1, int p2, int p3, int p4, int p5, int p6,
 void Encoder8bit::update()
 {
   noInterrupts();
-  _encoderPosAbs = 0;
+  /*_encoderPosAbs = 0;
     for(int i = 0; i < 8; i++)
     {
     _encoderPosAbs |= digitalRead(_pins[i]) << i;
     }
-    _encoderPosAbs = _conversionTable[_encoderPosAbs];
+	*/
+  // read Port (_encoderPort) and chose table depending on the 8bit value of the Port
+  
+  byte registerValue = *_encoderPort;
+  // De Tim het en seich im Layout gmacht und drum mues s erste und
+  // s zweite Bit kehrt werde ^^
+  registerValue = 	(registerValue & B11111100) | 
+                    ((registerValue &0x1) <<1)  | 
+					((registerValue &0x2) >> 1);
+  //---------------------------------------------------
+  
+  _encoderPosAbs = _conversionTable[registerValue];
   _encoderPosRel = _encoderPosAbs - _home;
   if(_encoderPosRel < 0)
   {
