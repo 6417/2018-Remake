@@ -4,12 +4,12 @@
 #include <Wire.h>
 #include "AbsoluteEncoder8bit.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
  #define SERIAL_BAUD 9600
 #endif
 
-#define USE_TIMED_UPDATE
+//#define USE_TIMED_UPDATE
 #ifndef USE_TIMED_UPDATE
  #define USE_UPDATE_ON_REQUEST
 #endif
@@ -17,10 +17,10 @@
 
 
 //variables for pins
-const uint16_t dipSwitchPins[4] {A3, A2, A1, A0};
+const uint16_t dipSwitchPins[4] {A0, A1, A2, A3};
 
 //variables for code
-const uint8_t address       = 5;
+uint8_t address             = 0;
 #ifdef USE_TIMED_UPDATE
 const unsigned long encoderUpdateInterval = 100; // us
 #endif
@@ -50,14 +50,15 @@ void returnAbsPosition();
 
 // PIND -> Inputregister for Arduino Nano Pins: 0, 1, 2, 3, 4, 5, 6, 7
 // DDRD -> Pinmoderegister for the same pins
-Encoder8bit encoder{PIND,DDRD};
+Encoder8bit encoder{&PIND,&DDRD};
 
 void setup()
 {
-  //set pinMode
+  //set pinMode and read address
   for (int i = 0; i < 4; i++)
   {
     pinMode(dipSwitchPins[i], INPUT);
+    address |= digitalRead(dipSwitchPins[i]) << i;
   }
 
   //begin I2C communication
@@ -69,6 +70,8 @@ void setup()
   //begin Serial communication
   Serial.begin(SERIAL_BAUD);
   Serial.println("Encoder8bit Version: "+String(Encoder8bit_version));
+  Serial.print("Address: ");
+  Serial.println(address,BIN);
   Serial.println("Setup completed");
 #endif
 
@@ -77,6 +80,10 @@ void setup()
 
 void loop()
 {
+  //volatile uint8_t *encoderPort = &PIND;
+
+  
+  //Serial.println(*encoderPort);
 #ifdef USE_TIMED_UPDATE
   unsigned long _micros = micros();
   if(_micros - lastMicros >= encoderUpdateInterval)
@@ -84,6 +91,8 @@ void loop()
     lastMicros = _micros;
     encoder.update();
     #ifdef DEBUG
+      Serial.print(encoder.getPosAbs());
+      Serial.print(" ");
       Serial.println(encoder.getPosRel());
     #endif
   }

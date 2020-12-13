@@ -1,10 +1,3 @@
-/*
-Autor:    Tim Koelbl, Alex Krieg
-Datum:    12.12.2020
-Version:  1.2.0
-*/
-
-#include "Arduino.h"
 #include "AbsoluteEncoder8bit.h"
 
 const int Encoder8bit::_conversionTable[256] = 
@@ -41,7 +34,7 @@ Encoder8bit::Encoder8bit(volatile uint8_t *encoderPort,
 						 volatile uint8_t *encoderPinModePort)
 {
 	
-	_encoderPort = encoderPinModePort;
+	_encoderPort = encoderPort;
 	
 	// Set all pins on the register to input pins
 	*encoderPinModePort = 0x0;
@@ -81,6 +74,7 @@ void Encoder8bit::update()
   registerValue = 	(registerValue & B11111100) | 
                     ((registerValue &0x1) <<1)  | 
 					((registerValue &0x2) >> 1);
+         
   //---------------------------------------------------
   
   _encoderPosAbs = _conversionTable[registerValue];
