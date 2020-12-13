@@ -16,8 +16,6 @@ public class SwerveModule {
         public double kP;
         public double kI;
         public double kD;
-        public double kS;
-        public double kV;
 
         public double acceleration;
         public double cruiseVelocity;
@@ -29,6 +27,7 @@ public class SwerveModule {
     public Translation2d location;
     private ProfiledPIDController pid;
     private SimpleMotorFeedforward rotationFeedforward;
+    private double lastPosition;
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
             Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
@@ -52,7 +51,7 @@ public class SwerveModule {
 
         final double turnFeedforward = rotationFeedforward.calculate(pid.getSetpoint().velocity);
 
-        motorSpeed.set(state.speedMetersPerSecond);
-        motorRotation.setVoltage(turnOutput + turnFeedforward);
+    public void updateEncoder() {
+        lastPosition = encoder.getRelPosition();
     }
 }

@@ -159,12 +159,10 @@ public final class Constants {
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
-               pidConst.kF = 0.0;
-               pidConst.kP = -3.875;
+               pidConst.kF = 0.50;
+               pidConst.kP = 0.0;
                pidConst.kI = 0.0;
-               pidConst.kD = 0.035;
-               pidConst.kS = 0.0;
-               pidConst.kV = 0.0;
+               pidConst.kD = 0.0;
 
                pidConst.acceleration = 0.0;
                pidConst.cruiseVelocity = 0.0;

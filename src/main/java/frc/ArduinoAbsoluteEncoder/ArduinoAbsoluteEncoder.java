@@ -35,8 +35,9 @@ public class ArduinoAbsoluteEncoder {
     private I2C device;
     public static final int maxTicks = 127;
     public static final int minTicks = 0;
+    private double minOut = minTicks;
+    private double maxOut = maxTicks;
     private static Register currentRegister = Register.ILLEGAL_VALUE;
-    private double distancePerPulse = 1.0;
 
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C
@@ -58,6 +59,12 @@ public class ArduinoAbsoluteEncoder {
             return false;
         currentRegister = Register.valueOf(data[0]);
         return true;
+    }
+
+    private double map(double val, double inMin, double inMax, double outMin, double outMax)
+    {
+        return outMin + ((outMax - outMin) / (inMax - inMin)) * (val - inMin);
+
     }
 
     private boolean read(Register register, ByteBuffer received) {
@@ -91,9 +98,9 @@ public class ArduinoAbsoluteEncoder {
         if (read(Register.GET_ABS_POSITION, buffer))
             return -1;
         if (!inverted)
-            return (double) buffer.get(0) * distancePerPulse;
+            return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
         else
-            return (maxTicks - buffer.get(0)) * distancePerPulse;
+            return map((maxTicks - buffer.get(0)), minTicks, maxTicks, minOut, maxOut);
     }
 
     /**
@@ -105,12 +112,13 @@ public class ArduinoAbsoluteEncoder {
         if (read(Register.GET_REL_POSITION, buffer))
             return -1;
         if (!inverted)
-            return (double) buffer.get(0) * distancePerPulse;
+            return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
         else
-            return (maxTicks - buffer.get(0)) * distancePerPulse;
+            return map((maxTicks - buffer.get(0)), minTicks, maxTicks, minOut, maxOut);
     }
 
-    public void setDistancePerPulse(double distance) {
-        distancePerPulse = distance;
+    public void setOutputRange(double minOut, double maxOut) {
+        this.minOut = minOut;
+        this.maxOut = maxOut;
     }
 }

@@ -39,9 +39,15 @@ public class SwerveDrive extends SubsystemBase {
 
 	public void setSpeeds(ChassisSpeeds speeds) {
 		SwerveModuleState[] moduleStates = Motors.SwerveDrive.kinematics.toSwerveModuleStates(speeds);
-		Motors.SwerveDrive.frontLeftModule.setDesiredState(moduleStates[0]);
-		Motors.SwerveDrive.frontRightModule.setDesiredState(moduleStates[1]);
+		// Motors.SwerveDrive.frontLeftModule.setDesiredState(moduleStates[0]);
+		// Motors.SwerveDrive.frontRightModule.setDesiredState(moduleStates[1]);
 		Motors.SwerveDrive.backLeftModule.setDesiredState(moduleStates[2]);
-		Motors.SwerveDrive.backRightModule.setDesiredState(moduleStates[3]);
+		// Motors.SwerveDrive.backRightModule.setDesiredState(moduleStates[3]);
+	}
+	public void updateEncoders() {
+		Motors.SwerveDrive.frontRightModule.updateEncoder();
+		Motors.SwerveDrive.frontLeftModule.updateEncoder();
+		Motors.SwerveDrive.backRightModule.updateEncoder();
+		Motors.SwerveDrive.backLeftModule.updateEncoder();
 	}
 }

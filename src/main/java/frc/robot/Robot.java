@@ -30,11 +30,14 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
+
+		System.out.println((Motors.SwerveDrive.backLeftModule.encoder.getAbsPosition() + Math.PI)
+				/ (2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks));
 	}
 
 	@Override
 	public void disabledInit() {
-		CommandScheduler.getInstance().schedule(new MoveLiftingUnitToBottomRobotDisabled());
+
 	}
 
 	@Override
@@ -52,22 +55,18 @@ public class Robot extends TimedRobot {
 
 	public void teleopInit() {
 		CommandScheduler.getInstance().schedule(new InitialCommand());
-
-		// CommandScheduler.getInstance().cancel(SwerveDrive.getInstance().getDefaultCommand());
+		SwerveDrive.getInstance();
+		System.out.println(SwerveDrive.getInstance().getDefaultCommand().getClass());
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		// final double desiredRotation = Math.PI / 2;
 		// if (Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
-		// 		- 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks < desiredRotation
-		// 		&& Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
-		// 				+ 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks > desiredRotation)
-		// 	Motors.SwerveDrive.backLeftModule
-		// 			.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(desiredRotation)));
-
-		// System.out.println(Motors.SwerveDrive.backLeftModule.encoder.getAbsPosition()
-		// 		/ (2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks));
+		// - 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks < desiredRotation
+		// && Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
+		// + 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks > desiredRotation)
+		final double desiredRotation = Math.PI / 2;
+		Motors.SwerveDrive.backLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(desiredRotation)));
 	}
 
 	@Override
