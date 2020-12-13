@@ -31,13 +31,12 @@ const int Encoder8bit::_conversionTable[256] =
   };
 
 Encoder8bit::Encoder8bit(volatile uint8_t *encoderPort,
-						 volatile uint8_t *encoderPinModePort)
+						             volatile uint8_t *encoderPinModePort)
 {
 	
 	_encoderPort = encoderPort;
 	
 	// Set all pins on the register to input pins
-	*encoderPinModePort = 0x0;
   /*_pins[0] = p0;
   _pins[1] = p1;
   _pins[2] = p2;
@@ -59,7 +58,7 @@ Encoder8bit::Encoder8bit(volatile uint8_t *encoderPort,
 
 void Encoder8bit::update()
 {
-  noInterrupts();
+  //noInterrupts();
   /*_encoderPosAbs = 0;
     for(int i = 0; i < 8; i++)
     {
@@ -72,8 +71,8 @@ void Encoder8bit::update()
   // De Tim het en seich im Layout gmacht und drum mues s erste und
   // s zweite Bit kehrt werde ^^
   registerValue = 	(registerValue & B11111100) | 
-                    ((registerValue &0x1) <<1)  | 
-					((registerValue &0x2) >> 1);
+                    ((registerValue &0x1) << 1) | 
+					          ((registerValue &0x2) >> 1);
          
   //---------------------------------------------------
   
@@ -83,7 +82,7 @@ void Encoder8bit::update()
   {
     _encoderPosRel += 128;
   }
-  interrupts();
+  //interrupts();
 }
 
 int Encoder8bit::getPosAbs()

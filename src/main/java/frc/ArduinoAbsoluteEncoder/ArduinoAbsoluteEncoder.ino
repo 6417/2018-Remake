@@ -3,13 +3,14 @@
 
 #include <Wire.h>
 #include "AbsoluteEncoder8bit.h"
+#include "Timer.h"
 
 //#define DEBUG
 #ifdef DEBUG
  #define SERIAL_BAUD 9600
 #endif
 
-//#define USE_TIMED_UPDATE
+#define USE_TIMED_UPDATE
 #ifndef USE_TIMED_UPDATE
  #define USE_UPDATE_ON_REQUEST
 #endif
@@ -22,16 +23,26 @@ const uint16_t dipSwitchPins[4] {A0, A1, A2, A3};
 //variables for code
 uint8_t address             = 0;
 #ifdef USE_TIMED_UPDATE
-const unsigned long encoderUpdateInterval = 100; // us
+const unsigned long encoderUpdateInterval = 0; // us
 #endif
 
-uint8_t ledState            = 0;
-uint8_t prevLedState        = 0;
-bool ledGreenState          = false;
-bool ledRedState            = false;
-uint16_t ledCounter1        = 0;
-uint16_t ledCounter2        = 0;
+//uint8_t ledState            = 0;
+//uint8_t prevLedState        = 0;
+//bool ledGreenState          = false;
+//bool ledRedState            = false;
+//uint16_t ledCounter1        = 0;
+//uint16_t ledCounter2        = 0;
 volatile byte registerRequest = 0x00;
+
+// Led stuff
+const byte led_red   = 9;
+const byte led_green = 10;
+const byte led_blue  = 11;
+
+const int encoderRun_blinkInterval = 500; // ms
+bool encoderRunBlinkToggle = true;
+Timer encoderRunTimer;
+// LedStuff end
 
 #ifdef USE_TIMED_UPDATE
 unsigned long lastMicros = 0;
@@ -52,6 +63,8 @@ void returnAbsPosition();
 // DDRD -> Pinmoderegister for the same pins
 Encoder8bit encoder{&PIND,&DDRD};
 
+void handleLed();
+
 void setup()
 {
   //set pinMode and read address
@@ -60,7 +73,9 @@ void setup()
     pinMode(dipSwitchPins[i], INPUT);
     address |= digitalRead(dipSwitchPins[i]) << i;
   }
-
+  pinMode(led_red,OUTPUT);
+  pinMode(led_green,OUTPUT);
+  pinMode(led_blue,OUTPUT);
   //begin I2C communication
   Wire.begin(address);
   Wire.onReceive(receiveEvent);
@@ -75,7 +90,7 @@ void setup()
   Serial.println("Setup completed");
 #endif
 
-
+  
 }
 
 void loop()
@@ -97,10 +112,12 @@ void loop()
     #endif
   }
 #endif
+  handleLed();
 }
 
 void receiveEvent(int numBytes)//on receive event save requested register
 {
+  digitalWrite(led_green,1);
   while (Wire.available())
   {
     registerRequest = Wire.read();
@@ -114,10 +131,12 @@ void receiveEvent(int numBytes)//on receive event save requested register
   Serial.print("requested register: ");
   Serial.println(registerRequest);
 #endif
+  digitalWrite(led_green,0);
 }
 
 void requestEvent()//on request event transmit requested data
 {
+  digitalWrite(led_green,1);
 #ifdef DEBUG
   Serial.println("master requested response");
 #endif
@@ -131,6 +150,7 @@ void requestEvent()//on request event transmit requested data
     case RETURN_REL_POSITION: returnRelPosition(); break; // return relative position to home
     default: break;
   }
+  digitalWrite(led_green,0);
 }
 
 void returnAbsPosition()
@@ -146,4 +166,32 @@ void returnRelPosition()
 void returnHomePosition()
 {
   Wire.write(encoder.getHome());
+}
+
+void handleLed()
+{
+  /*const float pi = 3.1415;
+  float angle = map(encoder.getPosRel()*10,0,2550,0,20*pi)/10;
+  if(angle>pi)
+    angle = 2*pi-angle;
+  if(angle < pi/4)
+  {
+    analogWrite(led_blue,map(angle*10,0,20*pi,255,0));
+  }*/
+  
+  if((encoder.getPosRel() < 5) || (encoder.getPosRel() > 250))
+  {
+    analogWrite(led_blue,100);
+    analogWrite(led_green,0);
+  }
+  else
+  {
+    digitalWrite(led_blue,0);
+    if(encoderRunTimer.start(encoderRun_blinkInterval))
+    {
+
+      analogWrite(led_green,50*encoderRunBlinkToggle);
+      encoderRunBlinkToggle = !encoderRunBlinkToggle;
+    }
+  }
 }
