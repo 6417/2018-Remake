@@ -32,6 +32,8 @@ public class ArduinoAbsoluteEncoder {
     }
 
     private boolean inverted = false;
+    private I2C.Port port;
+    private int adress;
     private I2C device;
     public static final int maxTicks = 127;
     public static final int minTicks = 0;
@@ -49,6 +51,8 @@ public class ArduinoAbsoluteEncoder {
 
     public ArduinoAbsoluteEncoder(I2C.Port port, int deviceAdress) {
         device = new I2C(port, deviceAdress);
+        this.port = port;
+        adress = deviceAdress;
     }
 
     /**
@@ -93,10 +97,10 @@ public class ArduinoAbsoluteEncoder {
      * @return Returns the current absolute position of the encoder. Returns -1 if
      *         the transfer wasn't successfull.
      */
-    public double getAbsPosition() {
+    public double getAbsPosition() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (read(Register.GET_ABS_POSITION, buffer))
-            return -1;
+            throw new Exception("Failed to read I2C");
         if (!inverted)
             return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
         else
@@ -107,10 +111,10 @@ public class ArduinoAbsoluteEncoder {
      * @return Returns the current relative position of the encoder to the home
      *         point. Returns -1 if the transfer wasn't successfull.
      */
-    public double getRelPosition() {
+    public double getRelPosition() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (read(Register.GET_REL_POSITION, buffer))
-            return -1;
+            throw new Exception("Failed to read I2C.");
         if (!inverted)
             return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
         else
@@ -120,5 +124,11 @@ public class ArduinoAbsoluteEncoder {
     public void setOutputRange(double minOut, double maxOut) {
         this.minOut = minOut;
         this.maxOut = maxOut;
+    }
+
+    public void restart() {
+        device.close();
+        device = null;
+        device = new I2C(port, adress);
     }
 }

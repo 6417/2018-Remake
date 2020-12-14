@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.I2C;
@@ -9,10 +12,10 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import frc.ArduinoAbsoluteEncoder.ArduinoAbsoluteEncoder;
+import frc.robot.Constants;
 
 public class SwerveModule {
     public static class PIDConstants {
-        public double kF;
         public double kP;
         public double kI;
         public double kD;
@@ -26,7 +29,6 @@ public class SwerveModule {
     public ArduinoAbsoluteEncoder encoder;
     public Translation2d location;
     private ProfiledPIDController pid;
-    private SimpleMotorFeedforward rotationFeedforward;
     private double lastPosition;
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
@@ -40,18 +42,40 @@ public class SwerveModule {
         pid = new ProfiledPIDController(pidConstants.kP, pidConstants.kI, pidConstants.kD,
                 new TrapezoidProfile.Constraints(pidConstants.cruiseVelocity, pidConstants.acceleration));
         pid.enableContinuousInput(-Math.PI, Math.PI);
-        rotationFeedforward = new SimpleMotorFeedforward(pidConstants.kS, pidConstants.kV);
 
-        encoder.setDistancePerPulse(2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks);
+        encoder.setOutputRange(-Math.PI, Math.PI);
         encoder.setHome(encoderHomePoint);
+        encoder.setInverted(true);
+    }
+
+    private double map(double val, double inMin, double inMax, double outMin, double outMax) {
+        return outMin + ((outMax - outMin) / (inMax - inMin)) * (val - inMin);
+
     }
 
     public void setDesiredState(SwerveModuleState state) {
-        final double turnOutput = pid.calculate(encoder.getRelPosition(), state.angle.getRadians());
+        double turnOutput;
+        turnOutput = pid.calculate(lastPosition, state.angle.getRadians());
 
-        final double turnFeedforward = rotationFeedforward.calculate(pid.getSetpoint().velocity);
+        System.out.println("TrunOutput: " + Double.toString(turnOutput) + " State.angle: "
+                + Double.toString(map(state.angle.getRadians(), -Math.PI, Math.PI, 0, 127)) + " Encoder Relpos: "
+                + Double.toString(map(lastPosition, -Math.PI, Math.PI, 0, 127)));
+        motorRotation.setVoltage(turnOutput);
+    }
+
+    private long timeOfLastFaile = -1; // -1 means no failure
 
     public void updateEncoder() {
-        lastPosition = encoder.getRelPosition();
+        try {
+            lastPosition = encoder.getRelPosition();
+            timeOfLastFaile = -1;
+        } catch (Exception e) {
+            if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
+                System.out.println(
+                        "Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                encoder.restart();
+            }
+            timeOfLastFaile = System.currentTimeMillis();
+        }
     }
 }

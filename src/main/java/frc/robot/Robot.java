@@ -65,7 +65,7 @@ public class Robot extends TimedRobot {
 		// - 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks < desiredRotation
 		// && Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
 		// + 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks > desiredRotation)
-		final double desiredRotation = Math.PI / 2;
+		final double desiredRotation = Math.PI;
 		Motors.SwerveDrive.backLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(desiredRotation)));
 	}
 

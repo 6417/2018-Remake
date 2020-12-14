@@ -115,6 +115,7 @@ public final class Constants {
 
     public static class SwerveDrive {
         public static final boolean isSubsystemEnabled = true;
+        public static final long allowableTimeOfEncoderFaliure = 500; // in millisecods
 
         public static class Front {
             public static class Right {
@@ -152,17 +153,15 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 3;
-                public static final byte homePoint = 106
-                ;
+                public static final byte homePoint = 108;
             }
         }
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
-               pidConst.kF = 0.50;
-               pidConst.kP = 0.0;
-               pidConst.kI = 0.0;
-               pidConst.kD = 0.0;
+               pidConst.kP = 3.95;
+               pidConst.kI = 0.75;
+               pidConst.kD = 0.1;
 
                pidConst.acceleration = 0.0;
                pidConst.cruiseVelocity = 0.0;
