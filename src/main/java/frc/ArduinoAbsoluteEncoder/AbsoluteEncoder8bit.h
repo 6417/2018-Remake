@@ -2,8 +2,8 @@
 #define Encoder8bit_h
 
 //Autor:    Tim Koelbl, Alex Krieg
-//Datum:    13.12.2020
-#define Encoder8bit_version  "1.2.1"
+//Datum:    14.12.2020
+#define Encoder8bit_version  "1.2.2"
 /*
 Encoder8bit is a arduino library for 8bit absolute encoders. It converts the gray code using
 a conversion array. The library has the ability to set a homepoint. The relative positions to this

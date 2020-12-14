@@ -9,10 +9,10 @@ namespace ERROR
 	static volatile uint8_t currentError = 0;
 	static uint8_t lastError             = 0;
 	
-	const uint8_t BAD_I2C_REGISTER_REQUEST = 2;
-	const uint8_t BAD_I2C_REGISTER_ACCESS  = 3;
-	const uint8_t I2C_TO_MUCH_DATA_REVIEVED  = 4;
-	const uint8_t I2C_TO_LESS_DATA_REVIEVED  = 5;
+	const uint8_t BAD_I2C_REGISTER_REQUEST 		= 2;
+	const uint8_t BAD_I2C_REGISTER_ACCESS  		= 3;
+	const uint8_t I2C_TO_MUCH_DATA_REVIEVED  	= 4;
+	const uint8_t I2C_TO_LESS_DATA_REVIEVED  	= 5;
 	
 	void clear();
 	void setError(uint8_t code);

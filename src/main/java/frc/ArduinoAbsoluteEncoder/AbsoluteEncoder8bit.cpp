@@ -122,7 +122,9 @@ void Encoder8bit::setHome()
 
 void Encoder8bit::setHome(uint8_t pos) 
 {
-  _home = pos;
+	if(pos >= 128)
+		pos -= 128;
+    _home = pos;
 }
 
 uint8_t Encoder8bit::getHome()
