@@ -14,13 +14,16 @@ namespace ERROR
 
 const int address = 1;
 enum Rquest {
-  RETURN_ABS_POSITION = 0x00,
-  SET_HOME            = 0x01,
-  RETURN_REL_POSITION = 0x02,
-  RETURN_CURRENT_ERROR        = 0x10,
-  RETURN_LAST_ERROR           = 0x11,
-  CLEAR_ERROR                 = 0x12,
-  RETURN_VERSION              = 0x20
+    RETURN_ABS_POSITION         = 0x00,
+    SET_HOME                    = 0x01,
+    RETURN_REL_POSITION         = 0x02,
+    RETURN_CURRENT_ERROR        = 0x10,
+    RETURN_LAST_ERROR           = 0x11,
+    CLEAR_ERROR                 = 0x12,
+    RETURN_VERSION              = 0x20,
+	
+	RETURN_ALL_POSITIONS		= 0x30,
+	RETURN_ALL_REGISTERS        = 0x31
 };
 
 byte getError();
@@ -126,6 +129,58 @@ bool readRegister(uint8_t reg, byte &retValue)
 		return success;
     }
     retValue = Wire.read();
+	
+	return success;
+}
+bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
+{
+	bool success = true;
+	Wire.beginTransmission(address);
+    Wire.write(RETURN_ALL_POSITIONS);
+    Wire.endTransmission();
+	
+	byte recievedBytes = Wire.requestFrom(address, 3); 
+    if(recievedBytes != 3)
+    {
+		success = false;
+		println("");
+		print("wrong byteAmount recieved from register: ");
+		print(RETURN_ALL_POSITIONS);
+		print(" bytes: ");
+		println(recievedBytes);
+		return success;
+    }
+    absPos  = Wire.read();
+	homePos = Wire.read();
+	relPos  = Wire.read();
+	
+	return success;
+}
+bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
+					  byte &currentError,byte &lastError, byte &version)
+{
+	bool success = true;
+	Wire.beginTransmission(address);
+    Wire.write(RETURN_ALL_REGISTERS);
+    Wire.endTransmission();
+	
+	byte recievedBytes = Wire.requestFrom(address, 6); 
+    if(recievedBytes != 6)
+    {
+		success = false;
+		println("");
+		print("wrong byteAmount recieved from register: ");
+		print(RETURN_ALL_REGISTERS);
+		print(" bytes: ");
+		println(recievedBytes);
+		return success;
+    }
+    absPos  		= Wire.read();
+	homePos 		= Wire.read();
+	relPos  		= Wire.read();
+	currentError  	= Wire.read();
+	lastError 		= Wire.read();
+	version  		= Wire.read();
 	
 	return success;
 }

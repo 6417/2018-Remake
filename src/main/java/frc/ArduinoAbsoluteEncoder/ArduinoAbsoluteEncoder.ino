@@ -12,7 +12,7 @@
 *            Neustart kann per Knopfdruck auf dem Sensor durchgeführt werden (Reset auf dem Arduino)
 *        
 *        Register:
-*            Adresse    | Lesen | Schreiben | Beschreibung 
+*            Adresse | Lesen | Schreiben | Beschreibung 
 *            --------+-------+-----------+----------------
 *             0x00   | JA    | NEIN      | RETURN_ABS_POSITION  -> Auslesen der absoluten Sensorposition. 1 bytes Wertebereich 0 - 127
 *             0x01   | JA    | JA        | SET_HOME             -> Setzen oder auslesen der Home Position. 1 bytes Wertebereich 0 - 127. 
@@ -23,6 +23,8 @@
 *             0x11   | JA    | NEIN      | RETURN_LAST_ERROR    -> Auslesen des letzten Fehlers. 1 bytes (Siehe Fehlermeldungen)
 *             0x12   | NEIN  | JA        | CLEAR_ERROR          -> Löscht beide Fehlerregister.
 *             0x20   | JA    | NEIN      | RETURN_VERSION       -> Auslesen der aktuellen Softwareversion. 1 bytes Wertebereich 0 - 255
+*             0x30   | JA    | NEIN      | RETURN_ALL_POSITIONS -> Auslesen aller Positionen. (3 bytes): ABS,HOME,REL
+*             0x31   | JA    | NEIN      | RETURN_ALL_REGISTERS -> Auslesen aller lesbaren Register. (6 bytes): ABS,HOME,REL,ERR1,ERR2,VERS
 *             
 *    Fehlermeldungen:
 *        Sollten Fehler während dem Betrieb erkannt werden, so wird der Fehlercode 3 mal über die LED rot 
@@ -61,7 +63,7 @@
 *                    | 0  ------|             |----------|                               |---------
 *                    |          
 *                    |          |                        |      |       |   |      
-*                    | (I2C kommunikation)             (I2C)  (I2C)   (I2C)(I2C)
+*                    | (I2C Kommunikation)             (I2C)  (I2C)   (I2C)(I2C)
 *                    
 *            Blau:   Die Blaue LED signalisiert blinkend, dass sich der Encoder in der Home Position befindet.
 *                    Die LED leuchtet, sobald sich der Encoder +- 5 Ticks um die Home Position befindet.
@@ -106,12 +108,10 @@
 //                          Diese option ist bevorzugt, da die Status LED auf stetige updates des 
 //                          Sensors angewiesen ist.
 // 
-// USE_UPDATE_ON_REQUEST -> Liest den Sensor nur dann ein, wenn der Master nach neuen Werten fragt.
-//                          LED funktioniert in diesem modus nur eingeschrenkt. (Home anzeige geht nicht)
+// USE_UPDATE_ON_REQUEST -> Liest den Sensor ein, wenn der Master nach neuen Werten fragt.
 #define USE_TIMED_UPDATE
-#ifndef USE_TIMED_UPDATE
- #define USE_UPDATE_ON_REQUEST
-#endif
+#define USE_UPDATE_ON_REQUEST
+
 
 
 #include <Wire.h>
@@ -133,10 +133,10 @@
 // besteht daher nur aus einer Zahl.
 #ifdef DEBUG
     const char *ENCODER_HARDWARE_VERSION_STR = "2";
-    const char *ENCODER_SOFTWARE_VERSION_STR = "2.0.0";
+    const char *ENCODER_SOFTWARE_VERSION_STR = "2.0.1";
 #endif
-#define     ENCODER_VERSION 1
-//     Datum:     14.12.2020
+#define     ENCODER_VERSION 2
+//     Datum:     16.12.2020
 //  Autor:  Tim Koelbl, Alex Krieg
 
 
@@ -156,7 +156,7 @@
 #ifdef USE_TIMED_UPDATE
   // CAN CHANGE:
     // Zeit Intervall für das zyklische updaten des Sensors
-    const unsigned long encoderUpdateInterval = 0; // us 
+    const unsigned long encoderUpdateInterval   = 0; // us 
     
   // DO NOT CHANGE:
     // Timer für das zyklische aufrufen des updates für den Sensor
@@ -170,10 +170,10 @@
 // IDLE MODE -----------------------------------------------
   // CAN CHANGE:
     // Schalte nach 5sekunden in den IDLE mode
-    const unsigned int idleTimeAfter             = 5000; // ms
+    const unsigned int idleTimeAfter            = 5000; // ms
     
     // Helligkeit für die farbe Orange
-    const byte     idleColorBrightness                = 128;
+    const byte     idleColorBrightness          = 128;
     
   // DO NOT CHANGE:
     // Timer der automatisch in den LED Idle mode umschaltet wenn die Zeit abgelaufen ist.
@@ -193,10 +193,10 @@
 // I2C TRAFFIC MODE ----------------------------------------
   // CAN CHANGE:
     // Zeit, nach der die grüne LED ausschalten soll.
-    const unsigned int i2cEventRecievedOnTime     = 100; // ms
+    const unsigned int i2cEventRecievedOnTime   = 100; // ms
     
     // Helligkeit für die farbe Grün
-    const byte     i2cEventColorBrightness            = 128;
+    const byte     i2cEventColorBrightness      = 128;
     
   // DO NOT CHANGE:
     // Timer der automatisch nach <i2cEventRecievedOnTime> ms die grüne LED ausschaltet,
@@ -204,7 +204,7 @@
     Timer i2cEventCooldownTimer;
     
     // Speichert ob die Gründe LED eingeschaltet sein soll oder nicht.
-    volatile bool i2cEventRecieved                 = false;
+    volatile bool i2cEventRecieved              = false;
     
     // callbackfunktion die der Timer ausführt
     void on_i2cEventCooldownTimer();
@@ -213,13 +213,13 @@
 // ERROR DISPLAY -------------------------------------------
   // CAN CHANGE:
     // Anzahl wiederholungen des Blinkcodes
-    const byte errorRepeatAmount                 = 3;
+    const byte errorRepeatAmount                = 3;
 
     // Blinkintervall des Blinkcodes
-    const unsigned int errorBlinkInterval         = 300; // ms
+    const unsigned int errorBlinkInterval       = 300; // ms
 
     // Helligkeit für die farbe Rot
-    const byte     errorColorBrightness            = 255;
+    const byte     errorColorBrightness         = 255;
     
   // DO NOT CHANGE:
     // Zählt die aktuellen wiederholungen die bereits ausgeführt wurden
@@ -235,10 +235,10 @@
 // HOME POS LED MODE ---------------------------------------
   // CAN CHANGE:
     // Tolleanz in dem Bereich um die Home Position, in der die blaue LED blinken soll.
-    const byte         homePosDisplayTolerance     = 5; // +- 5 encoder ticks (ca. 28 grad)
+    const byte         homePosDisplayTolerance  = 5; // +- 5 encoder ticks (ca. 28 grad)
     
     // Helligkeit für die farbe lau
-    const byte     homePosColorBrightness            = 255;
+    const byte     homePosColorBrightness       = 255;
     
     // Blinkintervall der blauen LED
     const unsigned int homePosBlinkInterval     = 200;
@@ -248,7 +248,7 @@
     Timer homePosBlinkTimer;
     
     // true, wenn die blaue LED leuchtet
-    bool homePosBlinkState = 0;
+    bool homePosBlinkState                      = 0;
 //----------------------------------------------------------
 
 
@@ -263,7 +263,10 @@
       RETURN_CURRENT_ERROR        = 0x10,
       RETURN_LAST_ERROR           = 0x11,
       CLEAR_ERROR                 = 0x12,
-      RETURN_VERSION              = 0x20
+      RETURN_VERSION              = 0x20,
+	  
+	  RETURN_ALL_POSITIONS		  = 0x30,
+	  RETURN_ALL_REGISTERS        = 0x31
     };
     
   // DO NOT CHANGE:
@@ -274,10 +277,10 @@
     uint8_t       address         = 0;
 
   // NO CHANGE, ADD ONLY:
-    // I2C callback funktion um ein register zu beschreiben
+    // I2C callback funktion um ein Register zu beschreiben
     void receiveEvent(int numBytes);
     
-    // I2C callback funktion um ein register aus zu lesen
+    // I2C callback funktion um ein Register aus zu lesen
     void requestEvent();
     
     // Sendet die absolute Position dem I2C Master zu
@@ -297,12 +300,20 @@
     
     // Sendet die Softwareversion dem I2C Master zu
     void returnVersion();
+	
+	// Sendet alle Positionen. (3 bytes): ABS,HOME,REL
+	void returnAllPositions();
+	
+	// Sendet alle lesbaren Register. (6 bytes): ABS,HOME,REL,ERR1,ERR2,VERS
+	void returnAllRegisters();
 //----------------------------------------------------------
 
 // PIND -> Inputregister for Arduino Nano Pins: 0, 1, 2, 3, 4, 5, 6, 7
 // DDRD -> Pinmoderegister for the same pins
 Encoder8bit encoder{&PIND,&DDRD};
 
+Timer handleLedTimer;
+const unsigned int handleLedInterval = 20; //ms
 void handleLed();
 
 #ifdef DEBUG
@@ -311,6 +322,7 @@ void handleLed();
 
 void setup()
 {
+    pinMode(13,OUTPUT);
     // set pinMode and read address
     for (int i = 0; i < 4; i++)
     {
@@ -345,9 +357,14 @@ void setup()
     // Lese die HomePosition aus dem EEPROM und setze damit die Encoder Home Position
     encoder.setHome(EEPROM.read(SET_HOME)); 
 }
-
+Timer blinkTimer;
 void loop()
 {
+    if(blinkTimer.start(300))
+    {
+
+      digitalWrite(13,!digitalRead(13));
+    }
     // update den Timer
     i2cEventCooldownTimer.update();
     
@@ -388,8 +405,11 @@ void loop()
     }
 #endif
 
-    // Update die LED
-    handleLed();
+	if(handleLedTimer.start(handleLedInterval))
+	{
+		// Update die LED
+		handleLed();
+	}
 }
 
 // Der I2C Master möchte auf ein Register zugreifen
@@ -410,7 +430,7 @@ void receiveEvent(int numBytes)
         // Lese das erste byte
         registerRequest = Wire.read();
         #ifdef DEBUG
-            Serial.print("Selected register: ");
+            Serial.print("Selected Register: ");
             Serial.println(registerRequest,HEX);
         #endif
         switch (registerRequest)
@@ -420,27 +440,29 @@ void receiveEvent(int numBytes)
                 if(numBytes == 2) // Setzt sie nur, wenn das zweite byte auch mitgesendet wurde.
                                   // Wenn nicht, gibts kein Fehler, da es sein kann, dass der I2C Master nuch aus diesem Register lesen möchte.
                     encoder.setHome(Wire.read()); 
-                    
+                    encoder.calculateRelativePos();
                     // Speichere die Home Position noch im EEPROM damit sie beständig bleibt. 
                     EEPROM.write(SET_HOME, encoder.getHome());
                 break;
                 
-            // Lösche die ERROR register
+            // Lösche die ERROR Register
             case CLEAR_ERROR:
                 ERROR::currentError = 0;
                 ERROR::lastError    = 0;
                 ERROR::errorOccured = false;
                 break;
                 
-            // Die nachfolgenden register können nicht mit daten beschrieben werden aber müssen aufgeführt werden, 
+            // Die nachfolgenden Register können nicht mit daten beschrieben werden aber müssen aufgeführt werden, 
             // da ansonnsten im default case ein Fehler geworfen wird, obwohl es diese Register gibt und obwohl nicht sicher steht,
             // ob diese überhaupt beschrieben werden sollen.
             case RETURN_ABS_POSITION: 
             case RETURN_REL_POSITION: 
             case RETURN_CURRENT_ERROR: 
             case RETURN_LAST_ERROR: 
-            case RETURN_VERSION: 
-                if(numBytes > 1) // Es wird versucht auf ein READ ONLY register zu schreiben
+            case RETURN_VERSION:
+			case RETURN_ALL_POSITIONS:
+			case RETURN_ALL_REGISTERS:
+                if(numBytes > 1) // Es wird versucht auf ein READ ONLY Register zu schreiben
                     ERROR::throw__i2c_badRegisterAccess(); // Diese Register sind READ ONLY
                 break;
             default:
@@ -457,12 +479,13 @@ void receiveEvent(int numBytes)
     {
         ERROR::throw__i2c_toMuchDataRecieved();
         // Leere den Buffer, da es sich um datenmüll handelt.
-        // bytes die nicht in das register geschrieben werden können.
+        // bytes die nicht in das Register geschrieben werden können.
         while(Wire.available())
         {
           Wire.read();
         }
     }
+    
 }
 
 // Der I2C Master möchte auf dem Register <registerRequest> Daten auslesen
@@ -486,19 +509,24 @@ void requestEvent()
         // Update den encoder
         encoder.update();
     #endif
+	
+	//noInterrupts();
     switch (registerRequest)
     {
-        case RETURN_ABS_POSITION:     returnAbsPosition();     break; // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
-        case SET_HOME:                 returnHomePosition();     break; // Sende dem I2C Master die Home Position des Encoders. 1 byte Wertebereich 0 - 127
-        case RETURN_REL_POSITION:     returnRelPosition();     break; // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127
-        case RETURN_CURRENT_ERROR:     returnCurrentError();     break; // Sende dem I2C Master den aktuellen Fehler. 1 byte
-        case RETURN_LAST_ERROR:     returnLastError();         break; // Sende dem I2C Master den letzten Fehler. 1 byte
+        case RETURN_ABS_POSITION:    returnAbsPosition();     break; // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
+        case SET_HOME:               returnHomePosition();    break; // Sende dem I2C Master die Home Position des Encoders. 1 byte Wertebereich 0 - 127
+        case RETURN_REL_POSITION:    returnRelPosition();     break; // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127
+        case RETURN_CURRENT_ERROR:   returnCurrentError();    break; // Sende dem I2C Master den aktuellen Fehler. 1 byte
+        case RETURN_LAST_ERROR:      returnLastError();       break; // Sende dem I2C Master den letzten Fehler. 1 byte
         case RETURN_VERSION:         returnVersion();         break; // Sende dem I2C Master die Softwareversion. 1 byte
-        default:
+        case RETURN_ALL_POSITIONS:   returnAllPositions();    break; // Sende dem I2C Master alle Positionen. ABS,HOME,REL
+		case RETURN_ALL_REGISTERS:   returnAllRegisters();    break; // Sende dem I2C Master alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
+		default:
             // Es wird versucht auf ein nicht vorhandenes Register zu zu greifen. Oder:
             // Es wird versucht auf ein WRITE ONLY Register zu zu greifen.
             ERROR::throw__i2c_badRegisterRequest();
     }
+	//interrupts();
 }
 
 // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
@@ -518,6 +546,8 @@ void returnRelPosition()
         Serial.print("returnRelPosition:  ");
         Serial.println(encoder.getPosRel());
     #endif
+    //if(!encoder.dataIsConsistent())
+    //  encoder.recalculate();
     Wire.write(encoder.getPosRel());
 }
 
@@ -561,6 +591,23 @@ void returnVersion()
     Wire.write(ENCODER_VERSION);
 }
 
+// Sendet alle Positionen. ABS,HOME,REL
+void returnAllPositions()
+{
+	returnAbsPosition();
+	returnHomePosition();
+	returnRelPosition();
+}
+	
+// Sendet alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
+void returnAllRegisters()
+{
+	returnAllPositions();
+	returnCurrentError();
+	returnLastError();
+	returnVersion();
+}
+
 
 void handleLed()
 {
@@ -578,9 +625,9 @@ void handleLed()
     {
         // Ändere alle 10 ms den winkel (RAD) für den Sinus
         // Verändert die Dimmfrequenz
-        if(idleLedDimTimer.start(10))
+        //if(idleLedDimTimer.start(10))
         {
-            encoderIdleBrightness += 0.01;
+            encoderIdleBrightness += 0.02;
             
             // Kontrollierter Overflow 
             // Dient dazu, dass der Sinus keine negativen Werte ausgiebt und dass <encoderIdleBrightness> nicht mit der zeit so gross wird, 

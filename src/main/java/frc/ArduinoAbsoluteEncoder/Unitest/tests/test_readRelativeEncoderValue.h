@@ -7,7 +7,7 @@ bool test_readRelativeEncoderValue()
 	consoleTabIn();
 	unsigned int successCounter = 0;
 	bool fail = false;
-	unsigned int cycles = 1000;
+	unsigned int cycles = 100;
 	
 	for(unsigned int cycle=0; cycle<cycles; cycle++)
 	{

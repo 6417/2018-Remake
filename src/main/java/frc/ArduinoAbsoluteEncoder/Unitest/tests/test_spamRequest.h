@@ -93,7 +93,7 @@ bool test_spamRequest()
 		if(interval == 0)
 		goto breakTest;
 		interval /= 2;
-		if(cycles < 25600)
+		if(cycles < 3200)
 		cycles   *= 2;
 		
 		

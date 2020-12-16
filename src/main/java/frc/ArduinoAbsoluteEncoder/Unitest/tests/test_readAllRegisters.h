@@ -102,7 +102,7 @@ bool test_readAllRegisters()
 		if(interval == 0)
 			goto breakTest;
 		interval /= 2;
-		if(cycles < 12800)
+		if(cycles < 3200/anzRegister)
 			cycles   *= 2;
 		
 		

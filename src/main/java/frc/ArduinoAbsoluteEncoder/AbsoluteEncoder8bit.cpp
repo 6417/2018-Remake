@@ -31,103 +31,84 @@ const int Encoder8bit::_conversionTable[256] =
   };
 
 Encoder8bit::Encoder8bit(volatile uint8_t *encoderPort,
-						             volatile uint8_t *encoderPinModePort)
+						 volatile uint8_t *encoderPinModePort)
 {
-	
 	_encoderPort = encoderPort;
-	
-	// Set all pins on the register to input pins
-  /*_pins[0] = p0;
-  _pins[1] = p1;
-  _pins[2] = p2;
-  _pins[3] = p3;
-  _pins[4] = p4;
-  _pins[5] = p5;
-  _pins[6] = p6;
-  _pins[7] = p7;
-  
-  for(int i = 0; i < 8; i++)
-  {
-    pinMode(_pins[i], INPUT);
-  }
-  */
-  _encoderPosAbs = 0;
-  _encoderPosRel = 0;
-  _home = 0;
+	_encoderPosAbs = 0;
+	_encoderPosRel = 0;
+	_home = 0;
+	//_dataConsistent = false;
 }
 
 void Encoder8bit::update()
 {
-  //noInterrupts();
-  /*_encoderPosAbs = 0;
-    for(int i = 0; i < 8; i++)
-    {
-    _encoderPosAbs |= digitalRead(_pins[i]) << i;
-    }
-	*/
-  // read Port (_encoderPort) and chose table depending on the 8bit value of the Port
-  
-  byte registerValue = *_encoderPort;
-  // De Tim het en seich im Layout gmacht und drum mues s erste und
-  // s zweite Bit kehrt werde ^^
-  registerValue = 	(registerValue & B11111100) | 
-                    ((registerValue &0x1) << 1) | 
-					          ((registerValue &0x2) >> 1);
-         
-  //---------------------------------------------------
-  
-  _encoderPosAbs = _conversionTable[registerValue];
-  _encoderPosRel = _encoderPosAbs - _home;
-  if(_encoderPosRel < 0)
-  {
-    _encoderPosRel += 128;
-  }
-  //interrupts();
-}
-
-int Encoder8bit::getPosAbs()
-{
-  return _encoderPosAbs;
-}
-
-float Encoder8bit::getDegAbs()
-{
-  return (float)_encoderPosAbs * 2.8125;
-}
-
-float Encoder8bit::getRadAbs()
-{
-  return (float)_encoderPosAbs * 2.8125 * DEG_TO_RAD;
-}
-
-int Encoder8bit::getPosRel()
-{
-  return _encoderPosRel;
-}
-
-float Encoder8bit::getDegRel()
-{
-  return (float)_encoderPosRel * 2.8125;
-}
-
-float Encoder8bit::getRadRel()
-{
-  return (float)_encoderPosRel * 2.8125 * DEG_TO_RAD;
+	byte registerValue = *_encoderPort;
+	// De Tim het en seich im Layout gmacht und drum mues s erste und
+	// s zweite Bit kehrt werde ^^
+	registerValue = 	(registerValue & B11111100) | 
+						((registerValue &0x1) << 1) | 
+								((registerValue &0x2) >> 1);
+			
+	//---------------------------------------------------
+	_encoderPosAbs = _conversionTable[registerValue];
+	calculateRelativePos();
 }
 
 void Encoder8bit::setHome()
 {
-  _home = _encoderPosAbs;
+	_home = _encoderPosAbs;
+	calculateRelativePos();
 }
 
 void Encoder8bit::setHome(uint8_t pos) 
 {
 	if(pos >= 128)
 		pos -= 128;
+	
     _home = pos;
+	calculateRelativePos();
 }
 
 uint8_t Encoder8bit::getHome()
 {
-  return _home;
+	return _home;
+}
+
+int Encoder8bit::getPosAbs()
+{
+	return _encoderPosAbs;
+}
+
+float Encoder8bit::getDegAbs()
+{
+	return (float)_encoderPosAbs * 2.8125;
+}
+
+float Encoder8bit::getRadAbs()
+{
+	return (float)_encoderPosAbs * 2.8125 * DEG_TO_RAD;
+}
+
+int Encoder8bit::getPosRel()
+{
+	return _encoderPosRel;
+}
+
+float Encoder8bit::getDegRel()
+{
+	return (float)_encoderPosRel * 2.8125;
+}
+
+float Encoder8bit::getRadRel()
+{
+	return (float)_encoderPosRel * 2.8125 * DEG_TO_RAD;
+}
+
+void Encoder8bit::calculateRelativePos()
+{
+	_encoderPosRel = _encoderPosAbs - _home;
+	if(_encoderPosRel < 0)
+	{
+		_encoderPosRel += 128;
+	}
 }

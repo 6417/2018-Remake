@@ -2,8 +2,8 @@
 #define Encoder8bit_h
 
 //Autor:    Tim Koelbl, Alex Krieg
-//Datum:    14.12.2020
-#define Encoder8bit_version  "1.2.2"
+//Datum:    16.12.2020
+#define Encoder8bit_version  "1.2.3"
 /*
 Encoder8bit is a arduino library for 8bit absolute encoders. It converts the gray code using
 a conversion array. The library has the ability to set a homepoint. The relative positions to this
@@ -34,10 +34,10 @@ class Encoder8bit
   float getDegRel();  //get relative position value in degrees. float value from 0-360
   float getRadRel();  //get relative position value in radians. float value flom 0-2xPI
   
-  
+  void calculateRelativePos();
   private:
   
-  //int _pins[8]; //array for pins of encoder
+ 
   static const int _conversionTable[256]; //array for convesion from gray code to binary
   int _encoderPosAbs; //integer to save absolute encoder position
   int _encoderPosRel; //integer to save relative encoder position
