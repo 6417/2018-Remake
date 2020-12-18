@@ -8,14 +8,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.ArduinoAbsoluteEncoder.ArduinoAbsoluteEncoder;
 import frc.robot.commands.InitialCommand;
-import frc.robot.commands.MoveLiftingUnitTo;
 import frc.robot.subsystems.SwerveDrive;
 
 public class Robot extends TimedRobot {
@@ -31,8 +25,6 @@ public class Robot extends TimedRobot {
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
 
-		System.out.println((Motors.SwerveDrive.backLeftModule.encoder.getAbsPosition() + Math.PI)
-				/ (2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks));
 	}
 
 	@Override
@@ -56,7 +48,6 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		CommandScheduler.getInstance().schedule(new InitialCommand());
 		SwerveDrive.getInstance();
-		System.out.println(SwerveDrive.getInstance().getDefaultCommand().getClass());
 	}
 
 	@Override
@@ -65,8 +56,8 @@ public class Robot extends TimedRobot {
 		// - 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks < desiredRotation
 		// && Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
 		// + 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks > desiredRotation)
-		final double desiredRotation = Math.PI;
-		Motors.SwerveDrive.backLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(desiredRotation)));
+		// final double desiredRotation = Math.PI;
+		// Motors.SwerveDrive.backLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(desiredRotation)));
 	}
 
 	@Override

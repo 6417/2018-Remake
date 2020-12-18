@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.ArduinoAbsoluteEncoder.ArduinoAbsoluteEncoder;
 import frc.robot.subsystems.SwerveModule;
 
 import java.util.LinkedHashMap;
@@ -159,10 +160,11 @@ public final class Constants {
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
-               pidConst.kP = 3.95;
-               pidConst.kI = 0.75;
-               pidConst.kD = 0.1;
-
+               pidConst.kP = 4.15;
+               pidConst.kI = 1.25;
+               pidConst.kD = 0.05;
+               
+               pidConst.tolerance = 3 * 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks; 
                pidConst.acceleration = 0.0;
                pidConst.cruiseVelocity = 0.0;
             }

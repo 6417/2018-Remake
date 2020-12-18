@@ -1,13 +1,9 @@
 package frc.robot.subsystems;
 
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
@@ -19,6 +15,7 @@ public class SwerveModule {
         public double kP;
         public double kI;
         public double kD;
+        public double tolerance;
 
         public double acceleration;
         public double cruiseVelocity;
@@ -42,6 +39,7 @@ public class SwerveModule {
         pid = new ProfiledPIDController(pidConstants.kP, pidConstants.kI, pidConstants.kD,
                 new TrapezoidProfile.Constraints(pidConstants.cruiseVelocity, pidConstants.acceleration));
         pid.enableContinuousInput(-Math.PI, Math.PI);
+        pid.setTolerance(pidConstants.tolerance);
 
         encoder.setOutputRange(-Math.PI, Math.PI);
         encoder.setHome(encoderHomePoint);
