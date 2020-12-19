@@ -41,8 +41,8 @@
 *                    |                                Es wurde versucht auf ein Register zu schreiben, welches WRITE ONLY ist.
 *         3          | BAD_I2C_REGISTER_ACCESS     -> Es wurde versucht auf ein Register zu schreiben, welches nicht vorhanden ist.
 *                    |                                Es wurde versucht auf ein Register zu schreiben, welches READ ONLY ist.
-*         4          | I2C_TO_MUCH_DATA_REVIEVED   -> Es wurden zu viele bytes an ein beschreibbares Register gesendet.
-*         5          | I2C_TO_LESS_DATA_REVIEVED   -> Es wurden zu wenige bytes an ein beschreibbares Register gesendet. (wird noch nirgends verwendet)
+*         4          | I2C_TO_MUCH_DATA_RECIEVED   -> Es wurden zu viele bytes an ein beschreibbares Register gesendet.
+*         5          | I2C_TO_LESS_DATA_RECIEVED   -> Es wurden zu wenige bytes an ein beschreibbares Register gesendet. (wird noch nirgends verwendet)
 *
 *
 *    Status LED:
@@ -257,16 +257,16 @@
     // Register, auf die der I2C Master zugreifen kann
     // Adressen nicht ändern um kompatibel zu bleiben, nur neue hinzufügen.
     enum Rquest {
-      RETURN_ABS_POSITION         = 0x00,
-      SET_HOME                    = 0x01,
-      RETURN_REL_POSITION         = 0x02,
-      RETURN_CURRENT_ERROR        = 0x10,
-      RETURN_LAST_ERROR           = 0x11,
-      CLEAR_ERROR                 = 0x12,
-      RETURN_VERSION              = 0x20,
-	  
-	  RETURN_ALL_POSITIONS		  = 0x30,
-	  RETURN_ALL_REGISTERS        = 0x31
+        RETURN_ABS_POSITION         = 0x00,
+        SET_HOME                    = 0x01,
+        RETURN_REL_POSITION         = 0x02,
+        RETURN_CURRENT_ERROR        = 0x10,
+        RETURN_LAST_ERROR           = 0x11,
+        CLEAR_ERROR                 = 0x12,
+        RETURN_VERSION              = 0x20,
+	    
+	    RETURN_ALL_POSITIONS        = 0x30,
+	    RETURN_ALL_REGISTERS        = 0x31
     };
     
   // DO NOT CHANGE:

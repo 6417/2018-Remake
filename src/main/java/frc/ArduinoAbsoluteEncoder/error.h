@@ -11,8 +11,8 @@ namespace ERROR
 	
 	const uint8_t BAD_I2C_REGISTER_REQUEST 		= 2;
 	const uint8_t BAD_I2C_REGISTER_ACCESS  		= 3;
-	const uint8_t I2C_TO_MUCH_DATA_REVIEVED  	= 4;
-	const uint8_t I2C_TO_LESS_DATA_REVIEVED  	= 5;
+	const uint8_t I2C_TO_MUCH_DATA_RECIEVED  	= 4;
+	const uint8_t I2C_TO_LESS_DATA_RECIEVED  	= 5;
 	
 	void clear();
 	void setError(uint8_t code);
@@ -60,14 +60,14 @@ void ERROR::throw__i2c_badRegisterAccess()
 }
 void ERROR::throw__i2c_toMuchDataRecieved()
 {
-	setError(I2C_TO_MUCH_DATA_REVIEVED);
+	setError(I2C_TO_MUCH_DATA_RECIEVED);
 	#ifdef DEBUG
 		Serial.println("ERROR: I2C to much data recieved");
     #endif
 }
 void ERROR::throw__i2c_toLessDataRecieved()
 {
-	setError(I2C_TO_LESS_DATA_REVIEVED);
+	setError(I2C_TO_LESS_DATA_RECIEVED);
 	#ifdef DEBUG
 		Serial.println("ERROR: I2C to less data recieved");
     #endif
