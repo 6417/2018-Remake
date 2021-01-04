@@ -45,7 +45,7 @@ public class RobotContainer {
 	private JoystickButton moveLiftingUnitToBottomButton = new JoystickButton(joystickControll,
 			Constants.LiftingUnit.moveLiftingUnitToBottomButtonId);
 
-	private JoystickButton reinitializeDriveMotorsButton = new JoystickButton(joystickDrive, Constants.SwerveDrive.reinitializeMotorsButtonId);
+	private JoystickButton reinitializeDriveMotorsButton = new JoystickButton(joystickDrive, Constants.resetButtonId);
 
 	private RobotContainer() {
 		configureButtonBindings();

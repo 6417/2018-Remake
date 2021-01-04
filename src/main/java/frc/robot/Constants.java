@@ -115,6 +115,7 @@ public final class Constants {
 
     public static class SwerveDrive {
         public static final boolean isSubsystemEnabled = true;
+        public static final double allowableTimeOfEncoderFaliure = 500;
 
         public static class Front {
             public static class Right {
@@ -159,12 +160,9 @@ public final class Constants {
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
-               pidConst.kF = 0.0;
-               pidConst.kP = -3.875;
-               pidConst.kI = 0.0;
-               pidConst.kD = 0.035;
-               pidConst.kS = 0.0;
-               pidConst.kV = 0.0;
+                pidConst.kP = 2.0;
+                pidConst.kI = 0.1;
+                pidConst.kD = 0.0;
 
                pidConst.acceleration = 0.0;
                pidConst.cruiseVelocity = 0.0;

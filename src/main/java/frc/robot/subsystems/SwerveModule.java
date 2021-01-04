@@ -30,6 +30,22 @@ public class SwerveModule {
     private double lastPosition;
     private byte homePoint;
 
+    public double getEncoderPos() {
+        updateEncoder();
+        return lastPosition;
+    }
+
+    /**
+     * @return returns -4 if read from encoder failed
+     */
+    public double getAbsPos() {
+        try {
+            return encoder.getAbsPosition();
+        } catch(Exception e) {
+            return -4;
+        }
+    }
+
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
             Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
         motorRotation = new WPI_TalonSRX(roationId);
