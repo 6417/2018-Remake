@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile.Constraints;
 import frc.ArduinoAbsoluteEncoder.ArduinoAbsoluteEncoder;
 import frc.robot.Constants;
 
@@ -27,6 +28,7 @@ public class SwerveModule {
     public Translation2d location;
     private ProfiledPIDController pid;
     private double lastPosition;
+    private byte homePoint;
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
             Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
@@ -40,9 +42,11 @@ public class SwerveModule {
                 new TrapezoidProfile.Constraints(pidConstants.cruiseVelocity, pidConstants.acceleration));
         pid.enableContinuousInput(-Math.PI, Math.PI);
         pid.setTolerance(pidConstants.tolerance);
+        pid.setConstraints(new Constraints());
 
         encoder.setOutputRange(-Math.PI, Math.PI);
         encoder.setHome(encoderHomePoint);
+        homePoint = encoderHomePoint;
         encoder.setInverted(true);
     }
 
@@ -72,6 +76,23 @@ public class SwerveModule {
                 System.out.println(
                         "Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
                 encoder.restart();
+            }
+            timeOfLastFaile = System.currentTimeMillis();
+        }
+    }
+
+    public void setHome() {
+        try {  
+            encoder.setHome(homePoint);
+        } catch (Exception e) {
+            if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
+                System.out.println("Home point of encoder with I2C id " + Integer.toString(encoder.getAddress())
+                        + "could not be set.");
+                System.out.println(
+                        "Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                encoder.restart();
+            } else {
+                setHome();
             }
             timeOfLastFaile = System.currentTimeMillis();
         }

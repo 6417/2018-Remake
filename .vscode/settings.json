@@ -20,5 +20,6 @@
     "**/.metadata/**",
     "**/archetype-resources/**",
     "**/META-INF/maven/**"
-  ]
+  ],
+  "cmake.configureOnOpen": false
 }

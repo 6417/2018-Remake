@@ -9,9 +9,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.ArduinoAbsoluteEncoder.ArduinoAbsoluteEncoder;
 import frc.robot.subsystems.SwerveModule;
 
-import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -115,6 +115,8 @@ public final class Constants {
 
     public static class SwerveDrive {
         public static final boolean isSubsystemEnabled = true;
+        public static final long allowableTimeOfEncoderFaliure = 500; // in millisecods
+        public static final int reinitializeMotorsButtonId = 1;
 
         public static class Front {
             public static class Right {
@@ -123,7 +125,7 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 1;
-                public static final byte homePoint = 0;
+                public static final byte homePoint = 84;
             }
             
             public static class Left {
@@ -132,7 +134,7 @@ public final class Constants {
                 public static final int motorRotationId = 5;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 4;
-                public static final byte homePoint = 0;
+                public static final byte homePoint = 32;
             }
         }        
         
@@ -152,20 +154,17 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 3;
-                public static final byte homePoint = 106
-                ;
+                public static final byte homePoint = 0;
             }
         }
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
             static {
-               pidConst.kF = 0.0;
-               pidConst.kP = -3.875;
-               pidConst.kI = 0.0;
-               pidConst.kD = 0.035;
-               pidConst.kS = 0.0;
-               pidConst.kV = 0.0;
-
+               pidConst.kP = 4.15;
+               pidConst.kI = 1.25;
+               pidConst.kD = 0.05;
+               
+               pidConst.tolerance = 3 * 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks; 
                pidConst.acceleration = 0.0;
                pidConst.cruiseVelocity = 0.0;
             }

@@ -45,6 +45,8 @@ public class RobotContainer {
 	private JoystickButton moveLiftingUnitToBottomButton = new JoystickButton(joystickControll,
 			Constants.LiftingUnit.moveLiftingUnitToBottomButtonId);
 
+	private JoystickButton reinitializeDriveMotorsButton = new JoystickButton(joystickDrive, Constants.SwerveDrive.reinitializeMotorsButtonId);
+
 	private RobotContainer() {
 		configureButtonBindings();
 	}
@@ -61,6 +63,11 @@ public class RobotContainer {
 		configureGripperButtonBindings();
 		configureCartButtonBindings();
 		configureLiftingUnitButtonBindings();
+		configureDriveButtons();
+	}
+
+	private void configureDriveButtons() {
+		reinitializeDriveMotorsButton.whenPressed(() -> { Motors.SwerveDrive.init(); });
 	}
 
 	private void configureLiftingUnitButtonBindings() {

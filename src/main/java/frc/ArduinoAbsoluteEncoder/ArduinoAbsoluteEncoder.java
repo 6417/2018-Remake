@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.I2C;
 
 public class ArduinoAbsoluteEncoder {
     public enum Register {
-        GET_ABS_POSITION((byte) 0x00), SET_HOME((byte) 0x01), GET_REL_POSITION((byte) 0x02), ILLEGAL_VALUE((byte) -1);
+        GET_ABS_POSITION((byte) 0x00), SET_HOME((byte) 0x01), GET_HOME((byte) 0x01), GET_REL_POSITION((byte) 0x02),
+        GET_CURRENT_ERROR((byte) 0x10), GET_LAST_ERROR((byte) 0x11), CLEAR_ERROR((byte) 0x12), GET_VERSION((byte) 0x20),
+        ILLEGAL_VALUE((byte) -1);
 
         public final byte address;
 
@@ -23,6 +25,26 @@ public class ArduinoAbsoluteEncoder {
 
         public static Register valueOf(byte address) {
             for (Register e : values()) {
+                if (e.address == address) {
+                    return e;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Error {
+        BAD_I2C_REGISTER_REQUEST((byte) 2), BAD_I2C_REGISTER_ACCESS((byte) 3), I2C_TO_MUCH_DATA_RECIEVED((byte) 4),
+        I2C_TO_LESS_DATA_RECIEVED((byte) 5), NO_ERROR((byte) 0);
+
+        public final byte address;
+
+        private Error(byte address) {
+            this.address = address;
+        }
+
+        public static Error valueOf(byte address) {
+            for (Error e : values()) {
                 if (e.address == address) {
                     return e;
                 }
@@ -61,12 +83,14 @@ public class ArduinoAbsoluteEncoder {
     private boolean write(byte[] data) {
         if (device.writeBulk(data, data.length))
             return false;
+
+        System.out.println(
+                "write to address: " + Integer.toString(adress) + " with size: " + Integer.toString(data.length));
         currentRegister = Register.valueOf(data[0]);
         return true;
     }
 
-    private double map(double val, double inMin, double inMax, double outMin, double outMax)
-    {
+    private double map(double val, double inMin, double inMax, double outMin, double outMax) {
         return outMin + ((outMax - outMin) / (inMax - inMin)) * (val - inMin);
 
     }
@@ -90,13 +114,16 @@ public class ArduinoAbsoluteEncoder {
      * @return Returns true if transfer was successfull
      */
     public boolean setHome(byte pos) {
-        return write(new byte[] {Register.SET_HOME.address, pos});
+        return write(new byte[] { Register.SET_HOME.address, pos });
     }
 
-    /**
-     * @return Returns the current absolute position of the encoder. Returns -1 if
-     *         the transfer wasn't successfull.
-     */
+    public byte getHome() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(1);
+        if (read(Register.GET_HOME, buffer))
+            throw new Exception("Failed to read I2C");
+        return buffer.get(0);
+    }
+
     public double getAbsPosition() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (read(Register.GET_ABS_POSITION, buffer))
@@ -107,6 +134,34 @@ public class ArduinoAbsoluteEncoder {
             return map((maxTicks - buffer.get(0)), minTicks, maxTicks, minOut, maxOut);
     }
 
+    private Error[] getErrors() throws Exception {
+        return new Error[] { Error.valueOf(getCurrentError().get(0)), Error.valueOf(getLastError().get(0)) };
+    }
+
+    private ByteBuffer getLastError() throws Exception {
+        ByteBuffer lastError = ByteBuffer.allocate(1);
+        if (read(Register.GET_LAST_ERROR, lastError))
+            throw new Exception("Failed to read I2C.");
+        return lastError;
+    }
+
+    private ByteBuffer getCurrentError() throws Exception {
+        ByteBuffer currentError = ByteBuffer.allocate(1);
+        if (read(Register.GET_CURRENT_ERROR, currentError))
+            throw new Exception("Failed to read I2C.");
+        return currentError;
+    }
+
+    private void printErrors() throws Exception {
+        for (Error e : getErrors())
+            printError(e);
+    }
+
+    private void printError(Error e) {
+        if (e != Error.NO_ERROR)
+            System.err.println("[ArduinoAbsoluteEncoder Error] " + e.name());
+    }
+
     /**
      * @return Returns the current relative position of the encoder to the home
      *         point. Returns -1 if the transfer wasn't successfull.
@@ -115,6 +170,7 @@ public class ArduinoAbsoluteEncoder {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (read(Register.GET_REL_POSITION, buffer))
             throw new Exception("Failed to read I2C.");
+        printErrors();
         if (!inverted)
             return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
         else
@@ -130,5 +186,9 @@ public class ArduinoAbsoluteEncoder {
         device.close();
         device = null;
         device = new I2C(port, adress);
+    }
+
+    public int getAddress() {
+        return adress;
     }
 }
