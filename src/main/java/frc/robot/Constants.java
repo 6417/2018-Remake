@@ -124,7 +124,7 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 1;
-                public static final byte homePoint = 0;
+                public static final byte homePoint = 98;
             }
             
             public static class Left {
@@ -133,7 +133,7 @@ public final class Constants {
                 public static final int motorRotationId = 5;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 4;
-                public static final byte homePoint = 0;
+                public static final byte homePoint = 50;
             }
         }        
         
@@ -144,7 +144,7 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 2;
-                public static final byte homePoint = 0;
+                public static final byte homePoint = 3;
             }
 
             public static class Left {
@@ -153,8 +153,7 @@ public final class Constants {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
                 public static final int encoderRotationDeviceAdress = 3;
-                public static final byte homePoint = 106
-                ;
+                public static final byte homePoint = 111;
             }
         }
 

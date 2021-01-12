@@ -7,6 +7,7 @@
 
 package frc.ArduinoAbsoluteEncoder;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import edu.wpi.first.wpilibj.I2C;
@@ -14,8 +15,8 @@ import edu.wpi.first.wpilibj.I2C;
 public class ArduinoAbsoluteEncoder {
     public enum Register {
         GET_ABS_POSITION((byte) 0x00), SET_HOME((byte) 0x01), GET_HOME((byte) 0x01), GET_REL_POSITION((byte) 0x02),
-        GET_CURRENT_ERROR((byte) 0x10), GET_LAST_ERROR((byte) 0x11), CLEAR_ERROR((byte) 0x12), GET_VERSION((byte) 0x20),
-        ILLEGAL_VALUE((byte) -1);
+        GET_ALL_POSITIONS((byte) 0x30), GET_CURRENT_ERROR((byte) 0x10), GET_LAST_ERROR((byte) 0x11),
+        CLEAR_ERROR((byte) 0x12), GET_VERSION((byte) 0x20), ILLEGAL_VALUE((byte) -1);
 
         public final byte address;
 
@@ -53,6 +54,12 @@ public class ArduinoAbsoluteEncoder {
         }
     }
 
+    public static class Positions {
+        public double relPos;
+        public double absPos;
+        public byte homePos;
+    }
+
     private boolean inverted = false;
     private I2C.Port port;
     private int adress;
@@ -62,6 +69,7 @@ public class ArduinoAbsoluteEncoder {
     private double minOut = minTicks;
     private double maxOut = maxTicks;
     private static Register currentRegister = Register.ILLEGAL_VALUE;
+    private Positions positions = new Positions();
 
     /**
      * Creates an ArduinoEncoder object wich is connected to the arduino trough I2C
@@ -81,13 +89,12 @@ public class ArduinoAbsoluteEncoder {
      * @param data
      */
     private boolean write(byte[] data) {
-        if (device.writeBulk(data, data.length))
-            return false;
+        if (device.writeBulk(data, data.length)) {
+            return true;
+        }
 
-        System.out.println(
-                "write to address: " + Integer.toString(adress) + " with size: " + Integer.toString(data.length));
         currentRegister = Register.valueOf(data[0]);
-        return true;
+        return false;
     }
 
     private double map(double val, double inMin, double inMax, double outMin, double outMax) {
@@ -97,10 +104,9 @@ public class ArduinoAbsoluteEncoder {
 
     private boolean read(Register register, ByteBuffer received) {
         if (currentRegister != register) {
-            if (!write(new byte[] { register.address }))
-                return false;
+            if (write(new byte[] { register.address }))
+                return true;
         }
-
         return device.readOnly(received, 1);
     }
 
@@ -111,7 +117,7 @@ public class ArduinoAbsoluteEncoder {
     /**
      * sets The current position of the encoder to 0
      * 
-     * @return Returns true if transfer was successfull
+     * @return Returns false if transfer was successfull
      */
     public boolean setHome(byte pos) {
         return write(new byte[] { Register.SET_HOME.address, pos });
@@ -128,10 +134,7 @@ public class ArduinoAbsoluteEncoder {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (read(Register.GET_ABS_POSITION, buffer))
             throw new Exception("Failed to read I2C");
-        if (!inverted)
-            return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
-        else
-            return map((maxTicks - buffer.get(0)), minTicks, maxTicks, minOut, maxOut);
+        return mapPosition(buffer.get(0));
     }
 
     private Error[] getErrors() throws Exception {
@@ -171,10 +174,25 @@ public class ArduinoAbsoluteEncoder {
         if (read(Register.GET_REL_POSITION, buffer))
             throw new Exception("Failed to read I2C.");
         printErrors();
+        return mapPosition(buffer.get(0));
+    }
+
+    private double mapPosition(byte pos) {
         if (!inverted)
-            return map((double) buffer.get(0), minTicks, maxTicks, minOut, maxOut);
+            return map(pos, minTicks, maxTicks, minOut, maxOut);
         else
-            return map((maxTicks - buffer.get(0)), minTicks, maxTicks, minOut, maxOut);
+            return map((maxTicks - pos), minTicks, maxTicks, minOut, maxOut);
+    }
+
+    public Positions getPositions() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(3);
+        if (read(Register.GET_ALL_POSITIONS, buffer))
+            throw new Exception("Failed to read I2C");
+        printErrors();
+        positions.absPos = mapPosition(buffer.get(0));
+        positions.homePos = buffer.get(1);
+        positions.relPos = mapPosition(buffer.get(2));
+        return positions;
     }
 
     public void setOutputRange(double minOut, double maxOut) {

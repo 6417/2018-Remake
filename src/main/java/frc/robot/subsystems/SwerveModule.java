@@ -27,23 +27,18 @@ public class SwerveModule {
     public ArduinoAbsoluteEncoder encoder;
     public Translation2d location;
     private ProfiledPIDController pid;
-    private double lastPosition;
+    private ArduinoAbsoluteEncoder.Positions lastPositions = new ArduinoAbsoluteEncoder.Positions();
     private byte homePoint;
 
     public double getEncoderPos() {
-        updateEncoder();
-        return lastPosition;
+        return lastPositions.relPos;
     }
 
     /**
      * @return returns -4 if read from encoder failed
      */
     public double getAbsPos() {
-        try {
-            return encoder.getAbsPosition();
-        } catch(Exception e) {
-            return -4;
-        }
+        return lastPositions.absPos;
     }
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
@@ -61,8 +56,8 @@ public class SwerveModule {
         pid.setConstraints(new Constraints());
 
         encoder.setOutputRange(-Math.PI, Math.PI);
-        encoder.setHome(encoderHomePoint);
         homePoint = encoderHomePoint;
+        setHome();
         encoder.setInverted(true);
     }
 
@@ -73,11 +68,8 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState state) {
         double turnOutput;
-        turnOutput = pid.calculate(lastPosition, state.angle.getRadians());
+        turnOutput = pid.calculate(lastPositions.relPos, state.angle.getRadians());
 
-        System.out.println("TrunOutput: " + Double.toString(turnOutput) + " State.angle: "
-                + Double.toString(map(state.angle.getRadians(), -Math.PI, Math.PI, 0, 127)) + " Encoder Relpos: "
-                + Double.toString(map(lastPosition, -Math.PI, Math.PI, 0, 127)));
         motorRotation.setVoltage(turnOutput);
     }
 
@@ -85,16 +77,20 @@ public class SwerveModule {
 
     public void updateEncoder() {
         try {
-            lastPosition = encoder.getRelPosition();
+            lastPositions = encoder.getPositions();
             timeOfLastFaile = -1;
         } catch (Exception e) {
             if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
                 System.out.println(
-                        "Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                        "[SwerveModule.updateEncoder] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
                 encoder.restart();
             }
             timeOfLastFaile = System.currentTimeMillis();
         }
+    }
+
+    public byte getHome() {
+        return lastPositions.homePos;
     }
 
     public void setHome() {
@@ -102,10 +98,8 @@ public class SwerveModule {
             encoder.setHome(homePoint);
         } catch (Exception e) {
             if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
-                System.out.println("Home point of encoder with I2C id " + Integer.toString(encoder.getAddress())
-                        + "could not be set.");
                 System.out.println(
-                        "Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                        "[SwerveModule.setHome] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
                 encoder.restart();
             } else {
                 setHome();
