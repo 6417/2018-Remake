@@ -66,6 +66,14 @@ public class Robot extends TimedRobot {
 			0.0);
 	ShuffleBoardInformation backRightEncoderHome = new ShuffleBoardInformation("Encoder Positoins", "Back Right Home",
 			0.0);
+	ShuffleBoardInformation frontRightEncoderRelPos = new ShuffleBoardInformation("Encoder Positoins",
+			"Front Right RelPos", 0.0);
+	ShuffleBoardInformation frontLeftEncoderRelPos = new ShuffleBoardInformation("Encoder Positoins",
+			"Front Left RelPos", 0.0);
+	ShuffleBoardInformation backLeftEncoderRelPos = new ShuffleBoardInformation("Encoder Positoins",
+			"Back Left RelPos", 0.0);
+	ShuffleBoardInformation backRightEncoderRelPos = new ShuffleBoardInformation("Encoder Positoins",
+			"Back Right RelPos", 0.0);
 
 	public void teleopInit() {
 		CommandScheduler.getInstance().schedule(new InitialCommand());
@@ -99,6 +107,14 @@ public class Robot extends TimedRobot {
 		frontRightEncoderHome.update(Motors.SwerveDrive.frontRightModule.getHome());
 		backRightEncoderHome.update(Motors.SwerveDrive.backRightModule.getHome());
 		backLeftEncoderHome.update(Motors.SwerveDrive.backLeftModule.getHome());
+		frontLeftEncoderRelPos
+				.update(Math.round(map(Motors.SwerveDrive.frontLeftModule.getEncoderPos(), -Math.PI, Math.PI, 0, 127)));
+		frontRightEncoderRelPos
+				.update(Math.round(map(Motors.SwerveDrive.frontRightModule.getEncoderPos(), -Math.PI, Math.PI, 0, 127)));
+		backRightEncoderRelPos
+				.update(Math.round(map(Motors.SwerveDrive.backRightModule.getEncoderPos(), -Math.PI, Math.PI, 0, 127)));
+		backLeftEncoderRelPos
+				.update(Math.round(map(Motors.SwerveDrive.backLeftModule.getEncoderPos(), -Math.PI, Math.PI, 0, 127)));
 		// if (Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()
 		// - 2 * Math.PI / ArduinoAbsoluteEncoder.maxTicks < desiredRotation
 		// && Motors.SwerveDrive.backLeftModule.encoder.getRelPosition()

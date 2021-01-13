@@ -107,7 +107,7 @@ public class ArduinoAbsoluteEncoder {
             if (write(new byte[] { register.address }))
                 return true;
         }
-        return device.readOnly(received, 1);
+        return device.readOnly(received, received.capacity());
     }
 
     public void setInverted(boolean inverted) {

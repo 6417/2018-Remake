@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -58,7 +59,6 @@ public class SwerveModule {
         encoder.setOutputRange(-Math.PI, Math.PI);
         homePoint = encoderHomePoint;
         setHome();
-        encoder.setInverted(true);
     }
 
     private double map(double val, double inMin, double inMax, double outMin, double outMax) {
@@ -81,8 +81,8 @@ public class SwerveModule {
             timeOfLastFaile = -1;
         } catch (Exception e) {
             if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
-                System.out.println(
-                        "[SwerveModule.updateEncoder] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                DriverStation.reportWarning(
+                        "[SwerveModule.updateEncoder] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.", false);
                 encoder.restart();
             }
             timeOfLastFaile = System.currentTimeMillis();
@@ -98,8 +98,8 @@ public class SwerveModule {
             encoder.setHome(homePoint);
         } catch (Exception e) {
             if (System.currentTimeMillis() - timeOfLastFaile > Constants.SwerveDrive.allowableTimeOfEncoderFaliure) {
-                System.out.println(
-                        "[SwerveModule.setHome] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.");
+                DriverStation.reportWarning(
+                        "[SwerveModule.setHome] Allowable time of encoder faliure has been exceeded, restarting connection to encoder now.", false);
                 encoder.restart();
             } else {
                 setHome();
