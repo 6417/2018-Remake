@@ -35,15 +35,12 @@ public class SwerveModule {
         return lastPositions.relPos;
     }
 
-    /**
-     * @return returns -4 if read from encoder failed
-     */
     public double getAbsPos() {
         return lastPositions.absPos;
     }
 
     public SwerveModule(int roationId, int speedId, I2C.Port encoderPort, int encoderDeviceAdress,
-            Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
+        Translation2d location, PIDConstants pidConstants, byte encoderHomePoint) {
         motorRotation = new WPI_TalonSRX(roationId);
         motorSpeed = new WPI_TalonSRX(speedId);
 
@@ -71,6 +68,7 @@ public class SwerveModule {
         turnOutput = pid.calculate(lastPositions.relPos, state.angle.getRadians());
 
         motorRotation.setVoltage(turnOutput);
+        motorSpeed.set(state.speedMetersPerSecond); // not m/s its a number between 0 and 1
     }
 
     private long timeOfLastFaile = -1; // -1 means no failure

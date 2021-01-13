@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.SwerveModule;
 
-import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;

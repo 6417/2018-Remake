@@ -7,7 +7,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.SwerveDrive;
 
 public class DefaultDriveCommand extends ParallelCommandGroup {
-	private static class UpdateEncoderCommand extends CommandBase {
+	public static class UpdateEncoderCommand extends CommandBase {
 		@Override
 		public void execute() {
 			SwerveDrive.getInstance().updateEncoders();
