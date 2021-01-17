@@ -9,10 +9,11 @@ namespace ERROR
 	static volatile uint8_t currentError = 0;
 	static uint8_t lastError             = 0;
 	
-	const uint8_t BAD_I2C_REGISTER_REQUEST 		= 2;
-	const uint8_t BAD_I2C_REGISTER_ACCESS  		= 3;
-	const uint8_t I2C_TO_MUCH_DATA_RECIEVED  	= 4;
-	const uint8_t I2C_TO_LESS_DATA_RECIEVED  	= 5;
+	constexpr uint8_t BAD_I2C_REGISTER_REQUEST 		= 2;
+	constexpr uint8_t BAD_I2C_REGISTER_ACCESS  		= 3;
+	constexpr uint8_t I2C_TO_MUCH_DATA_RECIEVED  	= 4;
+	constexpr uint8_t I2C_TO_LESS_DATA_RECIEVED  	= 5;
+	constexpr uint8_t TRANSMISION_FAILED 			= 6;
 	
 	void clear();
 	void setError(uint8_t code);
@@ -21,8 +22,7 @@ namespace ERROR
 	void throw__i2c_badRegisterAccess();
 	void throw__i2c_toMuchDataRecieved();
 	void throw__i2c_toLessDataRecieved();
-
-	
+	void throw__i2c_transmitionFailed();
 };
 
 

@@ -36,16 +36,18 @@
 *        
 *        Fehlercode  | Bedeutung
 *        ------------+--------------------------
-*         0          | Kein Fehler vorhanden
-*         2          | BAD_I2C_REGISTER_REQUEST    -> Es wurde versucht ein Register zu lesen, welches nicht vorhanden ist.
-*                    |                                Es wurde versucht auf ein Register zu schreiben, welches WRITE ONLY ist.
-*         3          | BAD_I2C_REGISTER_ACCESS     -> Es wurde versucht auf ein Register zu schreiben, welches nicht vorhanden ist.
-*                    |                                Es wurde versucht auf ein Register zu schreiben, welches READ ONLY ist.
-*         4          | I2C_TO_MUCH_DATA_RECIEVED   -> Es wurden zu viele bytes an ein beschreibbares Register gesendet.
-*         5          | I2C_TO_LESS_DATA_RECIEVED   -> Es wurden zu wenige bytes an ein beschreibbares Register gesendet. (wird noch nirgends verwendet)
+*         0x00       | Kein Fehler vorhanden
+*         0x03       | BAD_I2C_REGISTER_ACCESS     -> Es wurde versucht auf ein Register zu schreiben, welches nicht vorhanden ist.
+*         0x04       | I2C_TO_MUCH_DATA_RECIEVED   -> Es wurden zu viele bytes an ein beschreibbares Register gesendet.
+*                    |
+*       -   -   -   -|   -   -   -   -   -   -        Kritische Fehler die vom Master behandelt werden müssen (alle > 0xf0)
+*                    |
+*         0xf2       | BAD_I2C_REGISTER_REQUEST    -> Es wurde versucht ein Register zu lesen oder zu schreiben, welches nicht vorhanden ist.
+*         0xf5       | I2C_TO_LESS_DATA_RECIEVED   -> Es wurden zu wenige bytes an ein beschreibbares Register gesendet. (wird noch nirgends verwendet)
+*         0xf6       | I2C_INVALID_CRC             -> Bei der übertragung hat es einen fehler gegeben (die Check sum ist nicht die gleiche, wie die die vom Master geschickt wurde)
 *
 *
-*    Status LED:
+*   Status LED:
 *        Über die LED werden diverse Informationen dargestellt.
 *        
 *        Farben:    
@@ -86,7 +88,26 @@
 *                    | 0  ------|         |---------|         |------------------|         |---------|         |------
 *                    |          
 *                    |          |                         
-*                    |  (Fehler ist aufgetreten: code 2)            
+*                    |  (Fehler ist aufgetreten: code 2)
+*       
+*   Komunikations Protokoll:
+*       Zu den Daten die eigentlich gesendet werden wollen kommen noch mehr Informationen dazu um sicher zu stellen, dass bei der Übertagung nichts falsch läuft.
+*       
+*        ---------   ------------   --------------   -----------   -----------       -----------   ---------    
+*       |   SEQ   | |   Length   | |   Register   | |   Data0   | |   Data1   | ... |   DataN   | |   CRC   |         (jede Box ist ein byte)
+*        ---------   ------------   --------------   -----------   -----------       -----------   ---------    
+*     
+*       SEQ:      Eine vom Master generierte Zahl, jedes mal, wenn der Master etwas über den I2C schickt wird sie um 1 erhöt. Wenn er bei 0xff 
+*                 angelangt ist wird sie zu 0x01 gesetzt. Fals der Master etwas lesen will, muss der Slave den gleichen SEQ zurück schicken.
+*                 SEQ 0x00 wird bei der ersten Übertragung genutzt um die Verbindung zu testen.
+*       
+*       Length:   Anzahl Data die Geschickt werden wollen, im beispiel oben währe Length = N. Wenn der Master auf ein read only Register zugreift ist die Length 0.
+*
+*       Register: Das Register, auf das der Master zugreifen möchte. Wenn der Slave dem Master etwas schickt wird es genutzt um kritische Fehler zu senden
+*
+*       Data:     Die bytes die vom Master oder Slave gesendet werden
+*       
+*       CRC:      Die Check sum die von SEQ bis data N berechnet wird
 */
 
 
@@ -134,11 +155,11 @@
 // besteht daher nur aus einer Zahl.
 #ifdef DEBUG
     const char *ENCODER_HARDWARE_VERSION_STR = "2";
-    const char *ENCODER_SOFTWARE_VERSION_STR = "2.0.1";
+    const char *ENCODER_SOFTWARE_VERSION_STR = "2.1.0 alpha";
 #endif
-#define     ENCODER_VERSION 2
-//     Datum:     16.12.2020
-//  Autor:  Tim Koelbl, Alex Krieg
+#define     ENCODER_VERSION 3
+//     Datum:     17.1.2021
+//  Autor:  Tim Koelbl, Alex Krieg, Gian Laager
 
 
 // PINS ----------------------------------------------------
@@ -182,7 +203,7 @@
     
     // Timer zum dimmen der LED
     Timer idleLedDimTimer;
-    
+
     // true, wenn die Organge LED leuchtet
     volatile bool encoderIsIdle                 = false;
     
@@ -204,10 +225,15 @@
     // nachdem der I2C Bus benutzt wurde.
     Timer i2cEventCooldownTimer;
     
+    // Timer for initializing LED
+    Timer initializingTimer;
+    
     // Speichert ob die Gründe LED eingeschaltet sein soll oder nicht.
     volatile bool i2cEventRecieved              = false;
 
     volatile bool initializing                  = false;
+
+    volatile bool initializingLEDon             = false;
     
     // callbackfunktion die der Timer ausführt
     void on_i2cEventCooldownTimer();
@@ -444,9 +470,6 @@ void receiveEvent()
         // Lese das erste byte
         registerRequest = buffer.buffer[0];
         #ifdef DEBUG
-        Serial.println(buffer.size);
-        for (int i = 0; i < buffer.size; i++)
-            Serial.println(buffer.buffer[i], HEX);
         Serial.print("Selected Register: ");
         Serial.println(registerRequest,HEX);
         #endif
@@ -470,6 +493,7 @@ void receiveEvent()
                 ERROR::lastError    = 0;
                 ERROR::errorOccured = false;
                 break;
+            case INITIALZE_TEST: initializing = true;
                 
             // Die nachfolgenden Register können nicht mit daten beschrieben werden aber müssen aufgeführt werden, 
             // da ansonnsten im default case ein Fehler geworfen wird, obwohl es diese Register gibt und obwohl nicht sicher steht,
@@ -481,7 +505,6 @@ void receiveEvent()
             case RETURN_VERSION:
 			case RETURN_ALL_POSITIONS:
 			case RETURN_ALL_REGISTERS:
-            case INITIALZE_TEST:
                 if(buffer.size > 1) // Es wird versucht auf ein READ ONLY Register zu schreiben
                     ERROR::throw__i2c_badRegisterAccess(); // Diese Register sind READ ONLY
                 break;
@@ -562,7 +585,7 @@ void requestEvent()
 
 void sendError() 
 {
-    i2c.write(0xff);
+    i2c.writeError(0xff);
 }
 
 // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
@@ -578,6 +601,7 @@ void returnAbsPosition()
 void initializeTest()
 {
     i2c.write(0xfe);
+    initializing = true;
 }
 
 // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127
@@ -765,21 +789,26 @@ void handleLed()
         }
     }
 
-    if (initializing) 
+    if (initializing || initializingLEDon) 
     {
-        red = 255;
-        green = 128;
+        if (!initializingTimer.start(1000))
+        {
+            red = 255;
+            green = 48;
+            blue = 0;
+            initializingLEDon = true;
+        } else
+        {
+            initializingLEDon = false;
+            initializing = false;
+            registerRequest = 0x00;
+        }
     }
 
     // Setze  die Helligkeit der LED's
     analogWrite(led_red        , red);
     analogWrite(led_green    , green);
     analogWrite(led_blue    , blue);
-
-    if (initializing)
-    {
-        delay(500);
-    }
 }
 
 // Callback funktion für einen Timer

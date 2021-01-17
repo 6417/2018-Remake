@@ -3,6 +3,8 @@
 
 typedef unsigned char byte;
 
+#define DEBUG
+
 #include <Wire.h>
 #include <Arduino.h>
 
@@ -17,7 +19,6 @@ public:
     Array() = default;
     T &operator[](int index);
     T operator[](int index) const;
-    T get(int index);
 };
 
 namespace Exception
@@ -50,6 +51,7 @@ public:
     AbsoluteEncoderI2C() = default;
     void write(Array<byte> data);
     void write(byte data);
+    void writeError(byte errorCode);
     Array<byte> read();
 };
 
