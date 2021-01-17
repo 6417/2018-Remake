@@ -77,8 +77,8 @@ public class AbsoluteEncoderI2C extends I2C {
 
     private static byte calcCRC(ByteBuffer data) {
         byte crc = 0x00;
-        for (int i = data.capacity() - 1; i >= 0; i--) {
-            byte extract = data.get((data.capacity() - 1) - i);
+        for (int i = 0; i < data.position(); i++) {
+            byte extract = data.get(i);
             for (byte j = 8; j >= 0; j--) {
                 byte sum = (byte) ((crc ^ extract) & 0x01);
                 crc >>= 1;
@@ -89,7 +89,6 @@ public class AbsoluteEncoderI2C extends I2C {
             }
         }
         return crc;
-
     }
 
     private void increaseSEQ() {
@@ -106,20 +105,22 @@ public class AbsoluteEncoderI2C extends I2C {
 
     public void write(ByteBuffer buffer) throws Exception {
         assert buffer.capacity() <= 0xff : "length of data must be less than 256";
-        ByteBuffer data = ByteBuffer.allocate(buffer.capacity() - 2);
+        ByteBuffer data = ByteBuffer.allocate(buffer.capacity() + 2);
         data.put(SEQ);
-        data.put((byte) buffer.capacity());
+        data.put((byte) buffer.position());
         data.put(buffer);
-        data.put(calcCRC(data));
-        directWrite(data);
+        ByteBuffer sendBuffer = ByteBuffer.allocate(data.capacity() + 1);
+        sendBuffer.put(data);
+        sendBuffer.put(calcCRC(data));
+        directWrite(sendBuffer);
         increaseSEQ();
     }
     
     private void directRead(ByteBuffer received) throws Exception {
         if (readOnly(received, received.capacity()))
             throw new Exception(String.format("failed to read I2C on address: %d", address));
-        if (calcCRC(ByteBuffer.wrap(received.array(), 0, received.capacity() - 2)) != received
-                .get(received.array().length - 1))
+        if (calcCRC(ByteBuffer.wrap(received.array(), 0, received.capacity() - 1)) != received
+                .get(received.capacity() - 1))
             throw new Exception.InvalidCRC(String.format("Recived invalid CRC on address: %d", address));
         if (received.get(0) != SEQ)
             throw new Exception.InvalidSEQ(String.format("recived wrong SEQ on address: %d", address));
@@ -130,12 +131,12 @@ public class AbsoluteEncoderI2C extends I2C {
         directRead(received);
     }
 
-    private static final byte initTestResult = (byte) 0xff;
+    private static final byte initTestResult = (byte) 0xfe;
 
     private void initTest() throws Exception {
-        ByteBuffer initBuffer = ByteBuffer.allocate(1);
+        ByteBuffer initBuffer = ByteBuffer.allocate(4);
         read(Register.INIT_TEST, initBuffer);
-        if (initBuffer.get(0) != initTestResult)
+        if (initBuffer.get(2) != initTestResult)
             throw new Exception.InitFailed(String.format("Failed to initialize device with I2C address: %d", address)); 
     }
 

@@ -122,27 +122,27 @@ public final class Constants {
                 public static final int motorSpeedId = 7;
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
-                public static final int encoderRotationDeviceAdress = 1;
+                public static final byte encoderRotationDeviceAdress = 1;
                 public static final byte homePoint = 67;
             }
-            
+
             public static class Left {
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final int motorSpeedId = 6;
                 public static final int motorRotationId = 5;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
-                public static final int encoderRotationDeviceAdress = 4;
+                public static final byte encoderRotationDeviceAdress = 4;
                 public static final byte homePoint = 77;
             }
-        }        
-        
+        }
+
         public static class Back {
             public static class Right {
                 public static final int motorSpeedId = 11;
                 public static final int motorRotationId = 2;
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
-                public static final int encoderRotationDeviceAdress = 2;
+                public static final byte encoderRotationDeviceAdress = 2;
                 public static final byte homePoint = 123;
             }
 
@@ -151,19 +151,19 @@ public final class Constants {
                 public static final int motorRotationId = 10;
                 public static final I2C.Port encoderRotationPort = I2C.Port.kOnboard;
                 public static final Translation2d moduleLocation = new Translation2d(0.0, 0.0);
-                public static final int encoderRotationDeviceAdress = 3;
+                public static final byte encoderRotationDeviceAdress = 3;
                 public static final byte homePoint = 16;
             }
         }
 
         public static final SwerveModule.PIDConstants pidConst = new SwerveModule.PIDConstants();
-            static {
-                pidConst.kP = 2.0;
-                pidConst.kI = 0.1;
-                pidConst.kD = 0.0;
+        static {
+            pidConst.kP = 0.4375;
+            pidConst.kI = 0.05;
+            pidConst.kD = 0.0;
 
-               pidConst.acceleration = 0.0;
-               pidConst.cruiseVelocity = 0.0;
-            }
+            pidConst.acceleration = 0.0;
+            pidConst.cruiseVelocity = 0.0;
+        }
     }
 }
