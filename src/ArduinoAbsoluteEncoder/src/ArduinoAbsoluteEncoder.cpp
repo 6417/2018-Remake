@@ -134,12 +134,13 @@
 #define USE_UPDATE_ON_REQUEST
 
 
+#include "pch.h"
 
 #include <Wire.h>
 #include <EEPROM.h>
+#include "error.h"
 #include "AbsoluteEncoderI2C.h"
 #include "AbsoluteEncoder8bit.h"
-#include "error.h"
 
 // Das Programm verwendet Timer, darum dürfen keine delays verwendet werden.
 // Die Timer sind nicht interrupt gesteuert und werden durch delays daher blockiert.
@@ -227,6 +228,8 @@
     
     // Timer for initializing LED
     Timer initializingTimer;
+
+    const unsigned int initializingLEDDuration = 500; // ms
     
     // Speichert ob die Gründe LED eingeschaltet sein soll oder nicht.
     volatile bool i2cEventRecieved              = false;
@@ -286,18 +289,16 @@
     // Register, auf die der I2C Master zugreifen kann
     // Adressen nicht ändern um kompatibel zu bleiben, nur neue hinzufügen.
     enum Rquest {
-        SEND_ERROR                  = 0xff,
-        RETURN_ABS_POSITION         = 0x00,
-        SET_HOME                    = 0x01,
-        RETURN_REL_POSITION         = 0x02,
-        RETURN_CURRENT_ERROR        = 0x10,
-        RETURN_LAST_ERROR           = 0x11,
-        CLEAR_ERROR                 = 0x12,
-        RETURN_VERSION              = 0x20,
-        INITIALZE_TEST              = 0x40,
+        RETURN_ABS_POSITION          = 0x00,
+        SET_HOME                     = 0x01,
+        RETURN_REL_POSITION          = 0x02,
+        RETURN_LATEST_ERROR_ON_STACK = 0x03, 
+        CLEAR_ERROR                  = 0x12,
+        RETURN_VERSION               = 0x20,
+        INITIALZE_TEST               = 0x40,
 	    
-	    RETURN_ALL_POSITIONS        = 0x30,
-	    RETURN_ALL_REGISTERS        = 0x31
+	    RETURN_ALL_POSITIONS         = 0x30,
+	    RETURN_ALL_REGISTERS         = 0x31
     };
     
   // DO NOT CHANGE:
@@ -309,7 +310,7 @@
 
   // NO CHANGE, ADD ONLY:
     // I2C callback funktion um ein Register zu beschreiben
-    void receiveEvent();
+    void receiveEvent(int numOfBytes);
     
     // I2C callback funktion um ein Register aus zu lesen
     void requestEvent();
@@ -323,26 +324,19 @@
     // Sendet die relative Position, zur Home Position, dem I2C Master zu
     void returnRelPosition();
     
-    // Sendet die aktuelle Fehlermeldung dem I2C Master zu
-    void returnCurrentError();
-    
-    // Sendet die letzte Fehlermeldung dem I2C Master zu
-    void returnLastError();
-    
     // Sendet die Softwareversion dem I2C Master zu
     void returnVersion();
 	
 	// Sendet alle Positionen. (3 bytes): ABS,HOME,REL
 	void returnAllPositions();
+    
+    void returnLatestErrorOnStack();
 	
 	// Sendet alle lesbaren Register. (6 bytes): ABS,HOME,REL,ERR1,ERR2,VERS
 	void returnAllRegisters();
 
     // returns 0xfe to thest the connection when initialzing
     void initializeTest();
-
-    // returns error code 0xff
-    void sendError();
 //----------------------------------------------------------
 
 // PIND -> Inputregister for Arduino Nano Pins: 0, 1, 2, 3, 4, 5, 6, 7
@@ -450,7 +444,7 @@ void loop()
 }
 
 // Der I2C Master möchte auf ein Register zugreifen
-void receiveEvent()
+void receiveEvent(int numOfBytes)
 {
     // Stope den IDLE mode, schalte die orange LED aus
     encoderIsIdle    = false;
@@ -489,10 +483,7 @@ void receiveEvent()
                 
             // Lösche die ERROR Register
             case CLEAR_ERROR:
-                ERROR::currentError = 0;
-                ERROR::lastError    = 0;
-                ERROR::errorOccured = false;
-                break;
+                ERROR::clear(); break;
             case INITIALZE_TEST: initializing = true;
                 
             // Die nachfolgenden Register können nicht mit daten beschrieben werden aber müssen aufgeführt werden, 
@@ -500,8 +491,7 @@ void receiveEvent()
             // ob diese überhaupt beschrieben werden sollen.
             case RETURN_ABS_POSITION: 
             case RETURN_REL_POSITION: 
-            case RETURN_CURRENT_ERROR: 
-            case RETURN_LAST_ERROR: 
+            case RETURN_LATEST_ERROR_ON_STACK:
             case RETURN_VERSION:
 			case RETURN_ALL_POSITIONS:
 			case RETURN_ALL_REGISTERS:
@@ -511,7 +501,7 @@ void receiveEvent()
             default:
             {
                 // Werfe einen Fehler, da versucht wird, auf ein nicht vorhandenes Register zu zu greifen
-                ERROR::throw__i2c_badRegisterAccess();
+                ERROR::throw__i2c_badRegisterRequest();
                 break;
             }
         }
@@ -539,8 +529,6 @@ void receiveEvent()
         Serial.println("");
         #endif
       }
-      if (Exception::error != Exception::ErrorCodes::NO_ERROR)
-        registerRequest = SEND_ERROR;
 }
 
 // Der I2C Master möchte auf dem Register <registerRequest> Daten auslesen
@@ -568,24 +556,19 @@ void requestEvent()
 	//noInterrupts();
     switch (registerRequest)
     {
-        case RETURN_ABS_POSITION:    returnAbsPosition();     break; // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
-        case INITIALZE_TEST:         initializeTest();        break;
-        case SEND_ERROR:             sendError();             break;
-        case SET_HOME:               returnHomePosition();    break; // Sende dem I2C Master die Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_REL_POSITION:    returnRelPosition();     break; // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_CURRENT_ERROR:   returnCurrentError();    break; // Sende dem I2C Master den aktuellen Fehler. 1 byte case RETURN_LAST_ERROR:      returnLastError();       break; // Sende dem I2C Master den letzten Fehler. 1 byte
-        case RETURN_VERSION:         returnVersion();         break; // Sende dem I2C Master die Softwareversion. 1 byte
-        case RETURN_ALL_POSITIONS:   returnAllPositions();    break; // Sende dem I2C Master alle Positionen. ABS,HOME,REL
-		case RETURN_ALL_REGISTERS:   returnAllRegisters();    break; // Sende dem I2C Master alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
+        case RETURN_ABS_POSITION:          returnAbsPosition();        break; // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
+        case INITIALZE_TEST:               initializeTest();           break;
+        case SET_HOME:                     returnHomePosition();       break; // Sende dem I2C Master die Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_REL_POSITION:    returnRelPosition();     break; // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_CURRENT_ERROR:   returnCurrentError();    break; // Sende dem I2C Master den aktuellen Fehler. 1 byte case RETURN_LAST_ERROR:      returnLastError();       break; // Sende dem I2C Master den letzten Fehler. 1 byte
+        case RETURN_VERSION:               returnVersion();            break; // Sende dem I2C Master die Softwareversion. 1 byte
+        case RETURN_LATEST_ERROR_ON_STACK: returnLatestErrorOnStack(); break;
+        case RETURN_ALL_POSITIONS:         returnAllPositions();       break; // Sende dem I2C Master alle Positionen. ABS,HOME,REL
+		case RETURN_ALL_REGISTERS:         returnAllRegisters();       break; // Sende dem I2C Master alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
 		default:
             // Es wird versucht auf ein nicht vorhandenes Register zu zu greifen. Oder:
             // Es wird versucht auf ein WRITE ONLY Register zu zu greifen.
             ERROR::throw__i2c_badRegisterRequest();
     }
 	//interrupts();
-}
-
-void sendError() 
-{
-    i2c.writeError(0xff);
 }
 
 // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
@@ -626,24 +609,19 @@ void returnHomePosition()
     i2c.write(encoder.getHome());
 }
 
-// Sende dem I2C Master den aktuellen Fehler. 1 byte
-void returnCurrentError()
-{
-    #ifdef DEBUG
-        Serial.print("returnCurrentError:  ");
-        Serial.println(ERROR::currentError);
-    #endif
-    i2c.write(ERROR::currentError);
-}
-
 // Sende dem I2C Master den letzten Fehler. 1 byte
-void returnLastError()
+void returnLatestErrorOnStack()
 {
     #ifdef DEBUG
         Serial.print("returnLastError:  ");
-        Serial.println(ERROR::lastError);
+        if (!ERROR::errorStack.isEmpty())
+            Serial.println(ERROR::errorStack.peek());
     #endif
-    i2c.write(ERROR::lastError);
+
+    if(!ERROR::errorStack.isEmpty())
+        i2c.write(ERROR::errorStack.pop());
+    else
+        i2c.write(ERROR::ErrorCode::NO_ERROR);
 }
 
 // Sende dem I2C Master die Softwareversion. 1 byte
@@ -674,13 +652,12 @@ void returnAllRegisters()
     buffer[0] = encoder.getPosAbs();
     buffer[1] = encoder.getHome();
     buffer[2] = encoder.getPosRel();
-    buffer[3] = ERROR::currentError;
-    buffer[4] = ERROR::lastError;
+    buffer[3] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
+    buffer[4] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
     buffer[5] = ENCODER_VERSION;
     Array<byte> data(buffer, 6);
     i2c.write(data);
 }
-
 
 void handleLed()
 {
@@ -754,15 +731,32 @@ void handleLed()
         green = i2cEventColorBrightness;
     }
 
+    if (initializing || initializingLEDon) 
+    {
+        if (!initializingTimer.start(initializingLEDDuration))
+        {
+            red = 255;
+            green = 48;
+            blue = 0;
+            initializingLEDon = true;
+        } else
+        {
+            initializingLEDon = false;
+            initializing = false;
+            registerRequest = 0x00;
+        }
+    }
+
     // Wenn ein Fehler aufgetreten ist, soll der Fehler mit einem Blinkcode ausgegeben werden
-    if(ERROR::errorOccured)
+    if(!ERROR::errorStack.isEmpty())
     {
         // Setzt beide anderen Farben auf 0
         green = 0;
         blue  = 0;
         
         
-        if(errorCode_currentBlinkStep % 2 == 0 && errorCode_currentBlinkStep < 2*ERROR::currentError)
+        if(errorCode_currentBlinkStep % 2 == 0 && errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > 0xf0 ? 
+                ERROR::errorStack.peek() - 0xf0 : ERROR::errorStack.peek()) + 1)
         {
             red = errorColorBrightness;
         }
@@ -775,7 +769,8 @@ void handleLed()
         if(errorBlinkTimer.start(errorBlinkInterval))
         {
             errorCode_currentBlinkStep++;
-            if(errorCode_currentBlinkStep > 2*ERROR::currentError+1)
+            if(errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > 0xf0 ? 
+                ERROR::errorStack.peek() - 0xf0 : ERROR::errorStack.peek()) + 1)
             {
                 errorCode_currentBlinkStep     = 0;
                 errorRepeatCounter++;
@@ -786,22 +781,6 @@ void handleLed()
                     encoderIsIdle            = false;
                 }
             }
-        }
-    }
-
-    if (initializing || initializingLEDon) 
-    {
-        if (!initializingTimer.start(1000))
-        {
-            red = 255;
-            green = 48;
-            blue = 0;
-            initializingLEDon = true;
-        } else
-        {
-            initializingLEDon = false;
-            initializing = false;
-            registerRequest = 0x00;
         }
     }
 

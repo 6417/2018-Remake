@@ -1,6 +1,8 @@
 #ifndef Encoder8bit_h
 #define Encoder8bit_h
 
+#include "pch.h"
+
 //Autor:    Tim Koelbl, Alex Krieg
 //Datum:    16.12.2020
 #define Encoder8bit_version  "1.2.3"

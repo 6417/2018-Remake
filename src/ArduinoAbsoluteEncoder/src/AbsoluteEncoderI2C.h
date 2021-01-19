@@ -1,12 +1,11 @@
 #ifndef ABSOLUTE_ENCODER_I2C_H
 #define ABSOLUTE_ENCODER_I2C_H
 
-typedef unsigned char byte;
-
-#define DEBUG
+#include "pch.h"
 
 #include <Wire.h>
 #include <Arduino.h>
+#include <error.h>
 
 template <typename T>
 class Array
@@ -14,44 +13,26 @@ class Array
 public:
     T buffer[10];
     int size = 0;
-    Array(T *data, int size);
-    Array(int size);
+    Array(T *data, int size) __attribute__((noinline));
+    Array(int size) __attribute__((noinline));
     Array() = default;
-    T &operator[](int index);
-    T operator[](int index) const;
+    T &operator[](int index) __attribute__((noinline));
+    Array<T> slice(byte offset, byte length) __attribute__((noinline));
 };
-
-namespace Exception
-{
-    namespace Handler
-    {
-        void invalidCRC();
-    }
-
-    enum ErrorCodes
-    {
-        NO_ERROR = 0,
-        INVALID_CRC = 1
-    };
-
-    extern ErrorCodes error;
-
-    typedef void (*ErrorHandler)(void);
-
-    extern ErrorHandler handlerList[];
-}
 
 class AbsoluteEncoderI2C
 {
 private:
     byte SEQ;
     byte calcCRC(Array<byte> data) noexcept;
+    void readData(Array<byte> &data, byte length);
+    void checkCRC(byte recCRC, byte CRC);
+    Array<byte> createData(Array<byte> data, byte error = 0x00);
 
 public:
     AbsoluteEncoderI2C() = default;
-    void write(Array<byte> data);
-    void write(byte data);
-    void writeError(byte errorCode);
+    void write(Array<byte> data) __attribute__((noinline));
+    void writeError(byte error);
     Array<byte> read();
 };
 
