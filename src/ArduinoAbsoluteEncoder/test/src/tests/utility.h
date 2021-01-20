@@ -2,34 +2,47 @@
 #define UTILITY_H
 #include "Arduino.h"
 #include "print.h"
+#include "AbsoluteEncoderI2C-Master.h"
 
 // Error codes
 namespace ERROR
 {
-  const uint8_t BAD_I2C_REGISTER_REQUEST 	= 2;
-  const uint8_t BAD_I2C_REGISTER_ACCESS  	= 3;
-  const uint8_t I2C_TO_MUCH_DATA_REVIEVED  	= 4;
-  const uint8_t I2C_TO_LESS_DATA_REVIEVED  	= 5;
+  const uint8_t NO_ERROR = 0x00;
+  const uint8_t BAD_I2C_REGISTER_REQUEST = 0xf2;
+  const uint8_t BAD_I2C_REGISTER_ACCESS = 0x03;
+  const uint8_t I2C_TO_MUCH_DATA_RECIEVED = 0x04;
+  const uint8_t I2C_TO_LESS_DATA_RECIEVED = 0xf5;
+  const uint8_t INVALID_CRC = 0xf6;
 };
 
-const int address = 1;
 enum Rquest {
-    RETURN_ABS_POSITION         = 0x00,
-    SET_HOME                    = 0x01,
-    RETURN_REL_POSITION         = 0x02,
-    RETURN_CURRENT_ERROR        = 0x10,
-    RETURN_LAST_ERROR           = 0x11,
-    CLEAR_ERROR                 = 0x12,
-    RETURN_VERSION              = 0x20,
-	
-	RETURN_ALL_POSITIONS		= 0x30,
-	RETURN_ALL_REGISTERS        = 0x31
+    RETURN_ABS_POSITION          = 0x00,
+    SET_HOME                     = 0x01,
+    RETURN_REL_POSITION          = 0x02,
+    RETURN_LATEST_ERROR_ON_STACK = 0x10, 
+    CLEAR_ERROR                  = 0x11,
+    RETURN_VERSION               = 0x20,
+    INITIALZE_TEST               = 0x40,
+	    
+	RETURN_ALL_POSITIONS         = 0x30,
+	RETURN_ALL_REGISTERS         = 0x31
 };
 
 byte getError();
 void printError(uint8_t err);
 bool readRegister(uint8_t reg, byte &retValue);
 bool writeRegister(uint8_t reg, byte value);
+bool checkForCRCError();
+
+bool checkForCRCError() 
+{
+	if (AbsoluteEncoderI2C::Error::invalidCRCOcoured)
+	{
+		AbsoluteEncoderI2C::Error::invalidCRCOcoured = false;
+		return true;
+	}
+	return false;
+}
 
 byte getError()
 {
@@ -42,7 +55,7 @@ byte getError()
 	consoleTabIn();
 	delay(10);
     Wire.beginTransmission(address);
-    Wire.write(RETURN_LAST_ERROR);
+    Wire.write();
     // Wire.write(0x01);
     Wire.endTransmission();
     byte recievedBytes = Wire.requestFrom(address, 1);      // request 1 bytes from slave device
@@ -102,8 +115,8 @@ void printError(uint8_t err)
 		case 0: println("No error"); break;
 		case ERROR::BAD_I2C_REGISTER_REQUEST: println("BAD_I2C_REGISTER_REQUEST"); break;
 		case ERROR::BAD_I2C_REGISTER_ACCESS: println("BAD_I2C_REGISTER_ACCESS"); break;
-		case ERROR::I2C_TO_MUCH_DATA_REVIEVED: println("I2C_TO_MUCH_DATA_REVIEVED"); break;
-		case ERROR::I2C_TO_LESS_DATA_REVIEVED: println("I2C_TO_LESS_DATA_REVIEVED"); break;
+		case ERROR::I2C_TO_MUCH_DATA_RECIEVED: println("I2C_TO_MUCH_DATA_REVIEVED"); break;
+		case ERROR::I2C_TO_LESS_DATA_RECIEVED: println("I2C_TO_LESS_DATA_REVIEVED"); break;
 		default: print("Error not known. Code: "); println(err);
 	}
 }
@@ -113,46 +126,51 @@ bool readRegister(uint8_t reg, byte &retValue)
 {
 	bool success = true;
 	
-	Wire.beginTransmission(address);
-    Wire.write(reg);
-    Wire.endTransmission();
+	Array<byte> recievedBytes = i2c.read(reg, 2);
 	
-	byte recievedBytes = Wire.requestFrom(address, 1); 
-    if(recievedBytes != 1)
+    if(recievedBytes.size != 2)
     {
 		success = false;
 		println("");
 		print("wrong byteAmount recieved from register: ");
 		print(reg);
 		print(" bytes: ");
-		println(recievedBytes);
+		println(recievedBytes.size);
 		return success;
     }
-    retValue = Wire.read();
+
+	retValue = recievedBytes[1];
+	success = success && checkForCRCError();
+
+	if (!recievedBytes[0])
+		success = false;
 	
 	return success;
 }
 bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
 {
 	bool success = true;
-	Wire.beginTransmission(address);
-    Wire.write(RETURN_ALL_POSITIONS);
-    Wire.endTransmission();
+	Array<byte> recievedBytes = i2c.read(Rquest::RETURN_ALL_POSITIONS);
 	
-	byte recievedBytes = Wire.requestFrom(address, 3); 
-    if(recievedBytes != 3)
+    if(recievedBytes.size != 4)
     {
 		success = false;
 		println("");
 		print("wrong byteAmount recieved from register: ");
 		print(RETURN_ALL_POSITIONS);
 		print(" bytes: ");
-		println(recievedBytes);
+		println(recievedBytes.size);
 		return success;
-    }
-    absPos  = Wire.read();
-	homePos = Wire.read();
-	relPos  = Wire.read();
+	}
+
+    absPos  = recievedBytes[1];
+	homePos = recievedBytes[2];
+	relPos  = recievedBytes[3];
+
+	if (!recievedBytes[0])
+		success = false;
+
+	success = success && checkForCRCError();
 	
 	return success;
 }
@@ -160,36 +178,39 @@ bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
 					  byte &currentError,byte &lastError, byte &version)
 {
 	bool success = true;
-	Wire.beginTransmission(address);
-    Wire.write(RETURN_ALL_REGISTERS);
-    Wire.endTransmission();
 	
-	byte recievedBytes = Wire.requestFrom(address, 6); 
-    if(recievedBytes != 6)
+	Array<byte> recievedBytes = i2c.read(Rquest::RETURN_ALL_POSITIONS, 7);
+
+    if(recievedBytes.size != 7)
     {
 		success = false;
 		println("");
 		print("wrong byteAmount recieved from register: ");
 		print(RETURN_ALL_REGISTERS);
 		print(" bytes: ");
-		println(recievedBytes);
+		println(recievedBytes.size);
 		return success;
     }
-    absPos  		= Wire.read();
-	homePos 		= Wire.read();
-	relPos  		= Wire.read();
-	currentError  	= Wire.read();
-	lastError 		= Wire.read();
-	version  		= Wire.read();
+    absPos  		= recievedBytes[1];
+	homePos 		= recievedBytes[2];
+	relPos  		= recievedBytes[3];
+	currentError  	= recievedBytes[4];
+	lastError 		= recievedBytes[5];
+	version  		= recievedBytes[6];
+	
+	if (!recievedBytes[0])
+		success = false;
+	
+	success = success && checkForCRCError;
 	
 	return success;
 }
 bool writeRegister(uint8_t reg, byte value)
 {
-	Wire.beginTransmission(address);
-    Wire.write(reg);
-	Wire.write(value);
-    Wire.endTransmission();
+	Array<byte> sendBuffer(2);
+	sendBuffer[0] = reg;
+	sendBuffer[1] = value;
+	i2c.write(sendBuffer);
 	return true;
 }
 

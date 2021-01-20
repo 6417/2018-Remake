@@ -1,5 +1,7 @@
 #include "error.h"
 
+Stack<ERROR::ErrorCode, 4> ERROR::errorStack = Stack<ERROR::ErrorCode, 4>();
+
 void ERROR::clear()
 {
 	ERROR::errorStack.clear();

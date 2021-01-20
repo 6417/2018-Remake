@@ -20,7 +20,7 @@
 *                    |       |           |                         um in den Wertebereich zu gelangen.
 *             0x02   | JA    | NEIN      | RETURN_REL_POSITION  -> Auslesen der relativen Position zur Home Position. 1 bytes Wertebereich 0 - 127
 *             0x10   | JA    | NEIN      | RETURN_CURRENT_ERROR -> Auslesen der aktuell aufgetretenen Fehlermeldung. 1 bytes (Siehe Fehlermeldungen)
-*             0x11   | JA    | NEIN      | RETURN_LAST_ERROR    -> Auslesen des letzten Fehlers. 1 bytes (Siehe Fehlermeldungen)
+*             0x11   | JA    | NEIN      | dd
 *             0x12   | NEIN  | JA        | CLEAR_ERROR          -> Löscht beide Fehlerregister.
 *             0x20   | JA    | NEIN      | RETURN_VERSION       -> Auslesen der aktuellen Softwareversion. 1 bytes Wertebereich 0 - 255
 *             0x30   | JA    | NEIN      | RETURN_ALL_POSITIONS -> Auslesen aller Positionen. (3 bytes): ABS,HOME,REL
@@ -229,7 +229,7 @@
     // Timer for initializing LED
     Timer initializingTimer;
 
-    const unsigned int initializingLEDDuration = 500; // ms
+    const unsigned int initializingLEDDuration = 1000; // ms
     
     // Speichert ob die Gründe LED eingeschaltet sein soll oder nicht.
     volatile bool i2cEventRecieved              = false;
@@ -292,8 +292,8 @@
         RETURN_ABS_POSITION          = 0x00,
         SET_HOME                     = 0x01,
         RETURN_REL_POSITION          = 0x02,
-        RETURN_LATEST_ERROR_ON_STACK = 0x03, 
-        CLEAR_ERROR                  = 0x12,
+        RETURN_LATEST_ERROR_ON_STACK = 0x10, 
+        CLEAR_ERROR                  = 0x11,
         RETURN_VERSION               = 0x20,
         INITIALZE_TEST               = 0x40,
 	    
@@ -482,13 +482,12 @@ void receiveEvent(int numOfBytes)
                 break;
                 
             // Lösche die ERROR Register
-            case CLEAR_ERROR:
-                ERROR::clear(); break;
-            case INITIALZE_TEST: initializing = true;
+            case CLEAR_ERROR: ERROR::clear(); break;
                 
             // Die nachfolgenden Register können nicht mit daten beschrieben werden aber müssen aufgeführt werden, 
             // da ansonnsten im default case ein Fehler geworfen wird, obwohl es diese Register gibt und obwohl nicht sicher steht,
             // ob diese überhaupt beschrieben werden sollen.
+            case INITIALZE_TEST:
             case RETURN_ABS_POSITION: 
             case RETURN_REL_POSITION: 
             case RETURN_LATEST_ERROR_ON_STACK:
@@ -563,10 +562,12 @@ void requestEvent()
         case RETURN_LATEST_ERROR_ON_STACK: returnLatestErrorOnStack(); break;
         case RETURN_ALL_POSITIONS:         returnAllPositions();       break; // Sende dem I2C Master alle Positionen. ABS,HOME,REL
 		case RETURN_ALL_REGISTERS:         returnAllRegisters();       break; // Sende dem I2C Master alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
+
+        case CLEAR_ERROR:                  ERROR::throw__i2c_badRegisterAccess();
 		default:
             // Es wird versucht auf ein nicht vorhandenes Register zu zu greifen. Oder:
             // Es wird versucht auf ein WRITE ONLY Register zu zu greifen.
-            ERROR::throw__i2c_badRegisterRequest();
+            i2c.writeCurrentCriticalError();
     }
 	//interrupts();
 }
@@ -637,25 +638,25 @@ void returnVersion()
 // Sendet alle Positionen. ABS,HOME,REL
 void returnAllPositions()
 {
-    byte buffer[3];
-    buffer[0] = encoder.getPosAbs();
-    buffer[1] = encoder.getHome();
-    buffer[2] = encoder.getPosRel();
-    Array<byte> data(buffer, 3);
+    Array<byte> data(3);
+    data.buffer[0] = encoder.getPosAbs();
+    data.buffer[1] = encoder.getHome();
+    data.buffer[2] = encoder.getPosRel();
+    
     i2c.write(data);
 }
 	
 // Sendet alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
 void returnAllRegisters()
 {
-    byte buffer[6];
-    buffer[0] = encoder.getPosAbs();
-    buffer[1] = encoder.getHome();
-    buffer[2] = encoder.getPosRel();
-    buffer[3] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
-    buffer[4] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
-    buffer[5] = ENCODER_VERSION;
-    Array<byte> data(buffer, 6);
+    Array<byte> data(6);
+    data.buffer[0] = encoder.getPosAbs();
+    data.buffer[1] = encoder.getHome();
+    data.buffer[2] = encoder.getPosRel();
+    data.buffer[3] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
+    data.buffer[4] = ERROR::errorStack.isEmpty() ? ERROR::NO_ERROR : ERROR::errorStack.pop();
+    data.buffer[5] = ENCODER_VERSION;
+    
     i2c.write(data);
 }
 
@@ -743,7 +744,6 @@ void handleLed()
         {
             initializingLEDon = false;
             initializing = false;
-            registerRequest = 0x00;
         }
     }
 
@@ -755,8 +755,8 @@ void handleLed()
         blue  = 0;
         
         
-        if(errorCode_currentBlinkStep % 2 == 0 && errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > 0xf0 ? 
-                ERROR::errorStack.peek() - 0xf0 : ERROR::errorStack.peek()) + 1)
+        if(errorCode_currentBlinkStep % 2 == 0 && errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > ERROR::criticalErrorCodeMin ? 
+                ERROR::errorStack.peek() - ERROR::criticalErrorCodeMin : ERROR::errorStack.peek()) + 1)
         {
             red = errorColorBrightness;
         }
@@ -769,8 +769,8 @@ void handleLed()
         if(errorBlinkTimer.start(errorBlinkInterval))
         {
             errorCode_currentBlinkStep++;
-            if(errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > 0xf0 ? 
-                ERROR::errorStack.peek() - 0xf0 : ERROR::errorStack.peek()) + 1)
+            if(errorCode_currentBlinkStep > 2 * (ERROR::errorStack.peek() > ERROR::criticalErrorCodeMin ? 
+                ERROR::errorStack.peek() - ERROR::criticalErrorCodeMin : ERROR::errorStack.peek()) + 1)
             {
                 errorCode_currentBlinkStep     = 0;
                 errorRepeatCounter++;
@@ -778,7 +778,7 @@ void handleLed()
                 {
                     ERROR::clear();
                     errorRepeatCounter         = 0;
-                    encoderIsIdle            = false;
+                    encoderIsIdle              = false;
                 }
             }
         }
