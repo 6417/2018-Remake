@@ -8,6 +8,7 @@
 
 namespace ERROR
 {
+	constexpr byte criticalErrorCodeMin = 0xf0;
 	enum ErrorCode
 	{
 		NO_ERROR = 0x00,
@@ -18,7 +19,7 @@ namespace ERROR
 		INVALID_CRC = 0xf6
 	};
 
-	static Stack<ErrorCode, 4> errorStack;
+	extern Stack<ErrorCode, 4> errorStack;
 
 	void clear();
 	void setError(ErrorCode code);

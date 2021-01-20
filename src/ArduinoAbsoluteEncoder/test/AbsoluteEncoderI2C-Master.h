@@ -1,11 +1,11 @@
-#ifndef ABSOLUTE_ENCODER_I2C_H
-#define ABSOLUTE_ENCODER_I2C_H
+#ifndef ABSOLUTE_ENCDER_I2C_MASTER_H
+#define ABSOLUTE_ENCDER_I2C_MASTER_H
 
 #include "pch.h"
 
 #include <Wire.h>
-#include <Arduino.h>
-#include <error.h>
+
+typedef unsigned char byte;
 
 template <typename T>
 class Array
@@ -30,13 +30,19 @@ private:
     Array<byte> createData(Array<byte> data);
 
 public:
+    struct Error // used as an inner namespace
+    {
+        static bool invalidCRCOcoured;
+        static void throwInvalidCRC();
+    };
+
     AbsoluteEncoderI2C() = default;
     void write(Array<byte> data);
     void write(byte data);
-    void writeCurrentCriticalError();
-    Array<byte> read();
+    Array<byte> read(byte numOfBytes);
+    Array<byte> read(byte reg, byte numOfBytes);
 };
 
 extern AbsoluteEncoderI2C i2c;
 
-#endif
+#endif 

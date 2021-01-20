@@ -70,11 +70,15 @@ void Stack<T, size>::push(const T i)
 {
     // check if the stack is full.
     if (isFull())
+    {
         // shifts array and delets last element
         memcpy(contents, &contents[1], size - 1);
+        top--;
+    }
 
     // store the item to the array.
-    contents[top++] = i;
+    contents[top] = i;
+    top++;
 }
 
 // pop an item from the stack.
@@ -115,7 +119,7 @@ T Stack<T, size>::peek() const
 {
     // check if the stack is empty.
     if (isEmpty())
-        exit("STACK: can't peek item from stack: stack is empty.");
+        exit("STACK: can't peek item from stack: stack is empty."); // will still return a value but is undefined behaviour
 
     // get the top item from the array.
     return contents[top - 1];
@@ -132,7 +136,7 @@ bool Stack<T, size>::isEmpty() const
 template <typename T, size_t size>
 bool Stack<T, size>::isFull() const
 {
-    return top == size;
+    return top == size - 1;
 }
 
 // get the number of items in the stack.
