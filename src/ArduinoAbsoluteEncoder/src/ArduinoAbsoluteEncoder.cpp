@@ -110,6 +110,7 @@
 *       CRC:      Die Check sum die von SEQ bis data N berechnet wird
 */
 
+#include "pch.h"
 
 // Aktiviere die Serielle Schnittstelle mit debug Ausgaben.
 // Durch das Aktivieren der debug Funktion, müssen beide Jumper an 
@@ -117,7 +118,6 @@
 // Es können dadurch auch keine korrekten Positionsangaben ausgelesen werden.
 // Nach der Fehlersuche muss der debugmodus entfernt werden, 
 // da ansonnsten das Encodersignal gestört werden kann.
-#define DEBUG
 #ifdef DEBUG
 // Baudrate für die Konsole
  #define SERIAL_BAUD 115200
@@ -132,9 +132,6 @@
 // USE_UPDATE_ON_REQUEST -> Liest den Sensor ein, wenn der Master nach neuen Werten fragt.
 #define USE_TIMED_UPDATE
 #define USE_UPDATE_ON_REQUEST
-
-
-#include "pch.h"
 
 #include <Wire.h>
 #include <EEPROM.h>
@@ -556,6 +553,7 @@ void requestEvent()
     switch (registerRequest)
     {
         case RETURN_ABS_POSITION:          returnAbsPosition();        break; // Sende dem I2C Master die absolute Position des Encoders. 1 byte Wertebereich 0 - 127
+        case RETURN_REL_POSITION:          returnRelPosition();        break;
         case INITIALZE_TEST:               initializeTest();           break;
         case SET_HOME:                     returnHomePosition();       break; // Sende dem I2C Master die Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_REL_POSITION:    returnRelPosition();     break; // Sende dem I2C Master die relative Position zur Home Position des Encoders. 1 byte Wertebereich 0 - 127 case RETURN_CURRENT_ERROR:   returnCurrentError();    break; // Sende dem I2C Master den aktuellen Fehler. 1 byte case RETURN_LAST_ERROR:      returnLastError();       break; // Sende dem I2C Master den letzten Fehler. 1 byte
         case RETURN_VERSION:               returnVersion();            break; // Sende dem I2C Master die Softwareversion. 1 byte
@@ -563,7 +561,7 @@ void requestEvent()
         case RETURN_ALL_POSITIONS:         returnAllPositions();       break; // Sende dem I2C Master alle Positionen. ABS,HOME,REL
 		case RETURN_ALL_REGISTERS:         returnAllRegisters();       break; // Sende dem I2C Master alle lesbaren Register. ABS,HOME,REL,ERR1,ERR2,VERS
 
-        case CLEAR_ERROR:                  ERROR::throw__i2c_badRegisterAccess();
+        case CLEAR_ERROR:                  ERROR::throw__i2c_badRegisterAccess(); break;
 		default:
             // Es wird versucht auf ein nicht vorhandenes Register zu zu greifen. Oder:
             // Es wird versucht auf ein WRITE ONLY Register zu zu greifen.
@@ -618,11 +616,12 @@ void returnLatestErrorOnStack()
         if (!ERROR::errorStack.isEmpty())
             Serial.println(ERROR::errorStack.peek());
     #endif
-
+    i2c.disableSendErrorThoughRegister();
     if(!ERROR::errorStack.isEmpty())
         i2c.write(ERROR::errorStack.pop());
     else
         i2c.write(ERROR::ErrorCode::NO_ERROR);
+    i2c.enableSendErrorThroughRegister();
 }
 
 // Sende dem I2C Master die Softwareversion. 1 byte

@@ -50,7 +50,7 @@ Array<byte> AbsoluteEncoderI2C::read(byte numOfBytes)
     data[2] = Wire.read(); // reads register
 
     #ifdef DEBUG
-        Serial.print("recived Register: ");
+        Serial.print("recived Error: ");
         Serial.println(data[2], HEX);
     #endif
 
@@ -64,6 +64,7 @@ Array<byte> AbsoluteEncoderI2C::read(byte numOfBytes)
 Array<byte> AbsoluteEncoderI2C::read(byte reg, byte numOfBytes)
 {
     write(reg);
+    delay(10);
     return read(numOfBytes);
 }
 
@@ -101,9 +102,9 @@ void AbsoluteEncoderI2C::readData(Array<byte>& data, byte length)
 
 Array<byte> AbsoluteEncoderI2C::createData(Array<byte> data)
 {
-    Array<byte> sendBuffer(data.size + 4);
+    Array<byte> sendBuffer(data.size + 3);
     sendBuffer[0] = SEQ;
-    sendBuffer[1] = data.size;
+    sendBuffer[1] = data.size - 1;
 
     memcpy(&sendBuffer[2], data.buffer, data.size); // copies <data> in to the data section of <sendBuffer>
     sendBuffer[sendBuffer.size - 1] = calcCRC(sendBuffer.slice(0, sendBuffer.size - 1));

@@ -29,7 +29,7 @@ bool test_readRelativeEncoderValue_muchData()
 		Wire.requestFrom(address, 1);      // request 1 bytes from slave device
 	
 		
-		if(getError() != ERROR::I2C_TO_MUCH_DATA_REVIEVED)
+		if(getError() != ERROR::I2C_TO_MUCH_DATA_RECIEVED)
 			fail = 1;
 		
 		/*if(cycle % (cycles/10) == 0 || cycles < 10)

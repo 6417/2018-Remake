@@ -23,63 +23,63 @@ byte AbsoluteEncoderI2C::calcCRC(Array<byte> data) noexcept
     return crc;
 }
 
-Array<byte> AbsoluteEncoderI2C::read() 
+Array<byte> AbsoluteEncoderI2C::read()
 {
     SEQ = Wire.read();
 
-    #ifdef DEBUG
-        Serial.print("SEQ: ");
-        Serial.println(SEQ, HEX);
-    #endif
+#ifdef DEBUG
+    Serial.print("SEQ: ");
+    Serial.println(SEQ, HEX);
+#endif
 
     byte length = Wire.read();
 
-    #ifdef DEBUG
-        Serial.print("length: ");
-        Serial.println(length, HEX);
-    #endif
+#ifdef DEBUG
+    Serial.print("length: ");
+    Serial.println(length, HEX);
+#endif
 
     Array<byte> data(length + 3);
     data[0] = SEQ;
     data[1] = length;
     data[2] = Wire.read(); // reads register
 
-    #ifdef DEBUG
-        Serial.print("recived Register: ");
-        Serial.println(data[2], HEX);
-    #endif
+#ifdef DEBUG
+    Serial.print("recived Register: ");
+    Serial.println(data[2], HEX);
+#endif
 
     readData(data, length);
     byte CRC = Wire.read();
     checkCRC(CRC, calcCRC(data));
 
     return data.slice(2, data[1] + 1);
-} 
+}
 
 void AbsoluteEncoderI2C::checkCRC(byte recCRC, byte CRC)
 {
-    #ifdef DEBUG 
-        Serial.print("CRC: ");
-        Serial.print(recCRC, HEX);
-        Serial.print(", expected CRC: ");
-        Serial.println(CRC, HEX);
-    #endif
+#ifdef DEBUG
+    Serial.print("CRC: ");
+    Serial.print(recCRC, HEX);
+    Serial.print(", expected CRC: ");
+    Serial.println(CRC, HEX);
+#endif
 
-    if (recCRC != CRC) 
+    if (recCRC != CRC)
         ERROR::throw__i2c_invalidCRC();
 }
 
-void AbsoluteEncoderI2C::readData(Array<byte>& data, byte length)
+void AbsoluteEncoderI2C::readData(Array<byte> &data, byte length)
 {
     for (int i = 3; i < length + 3; i++)
     {
         data[i] = Wire.read();
-        #ifdef DEBUG
-            Serial.print("data index: ");
-            Serial.print(i - 3);
-            Serial.print(": ");
-            Serial.println(data[i], HEX);
-        #endif
+#ifdef DEBUG
+        Serial.print("data index: ");
+        Serial.print(i - 3);
+        Serial.print(": ");
+        Serial.println(data[i], HEX);
+#endif
     }
 }
 
@@ -89,30 +89,48 @@ Array<byte> AbsoluteEncoderI2C::createData(Array<byte> data)
     sendBuffer[0] = SEQ;
     sendBuffer[1] = data.size;
 
-    if (!ERROR::errorStack.isEmpty()) // && ERROR::errorStack.peek() > ERROR::criticalErrorCodeMin)
-        sendBuffer[2] = ERROR::errorStack.pop();
-    else
-        sendBuffer[2] = ERROR::ErrorCode::NO_ERROR;
-
+    setRegisterToError(sendBuffer);
     memcpy(&sendBuffer[3], data.buffer, data.size); // copies <data> in to the data section of <sendBuffer>
     sendBuffer[sendBuffer.size - 1] = calcCRC(sendBuffer.slice(0, sendBuffer.size - 1));
     return sendBuffer;
+}
+
+void AbsoluteEncoderI2C::setRegisterToError(Array<byte> &sendBuffer)
+{
+    if (sendErrorThroughRegister)
+    {
+        if (!ERROR::errorStack.isEmpty() && ERROR::errorStack.peek() > ERROR::criticalErrorCodeMin)
+            sendBuffer[2] = ERROR::errorStack.pop();
+        else
+            sendBuffer[2] = ERROR::ErrorCode::NO_ERROR;
+    } else
+        sendBuffer[2] = ERROR::ErrorCode::NO_ERROR;
+}
+
+void AbsoluteEncoderI2C::enableSendErrorThroughRegister()
+{
+    sendErrorThroughRegister = true;
+}
+
+void AbsoluteEncoderI2C::disableSendErrorThoughRegister()
+{
+    sendErrorThroughRegister = false;
 }
 
 void AbsoluteEncoderI2C::write(Array<byte> data)
 {
     Array<byte> sendBuffer = createData(data);
 
-    #ifdef DEBUG
-        Serial.print("Sending: ");
-        for (int i = 0; i < sendBuffer.size -1; i++){
-            Serial.print(sendBuffer[i], HEX);
-            Serial.print(", ");
-        }
-        Serial.println(sendBuffer.size -1, HEX);
-    #endif
-    
-    Wire.beginTransmission(adress);
+#ifdef DEBUG
+    Serial.print("Sending: ");
+    for (int i = 0; i < sendBuffer.size - 1; i++)
+    {
+        Serial.print(sendBuffer[i], HEX);
+        Serial.print(", ");
+    }
+    Serial.println(sendBuffer.size - 1, HEX);
+#endif
+
     Wire.write(sendBuffer.buffer, sendBuffer.size);
 }
 
@@ -120,14 +138,15 @@ void AbsoluteEncoderI2C::writeCurrentCriticalError()
 {
     Array<byte> sendBuffer = createData(Array<byte>(0));
 
-    #ifdef DEBUG
-        Serial.print("Sending: ");
-        for (int i = 0; i < sendBuffer.size -1; i++){
-            Serial.print(sendBuffer[i], HEX);
-            Serial.print(", ");
-        }
-        Serial.println(sendBuffer.size -1, HEX);
-    #endif
+#ifdef DEBUG
+    Serial.print("Sending: ");
+    for (int i = 0; i < sendBuffer.size - 1; i++)
+    {
+        Serial.print(sendBuffer[i], HEX);
+        Serial.print(", ");
+    }
+    Serial.println(sendBuffer.size - 1, HEX);
+#endif
 
     Wire.write(sendBuffer.buffer, sendBuffer.size);
 }
@@ -137,22 +156,22 @@ void AbsoluteEncoderI2C::write(byte data)
     write(Array<byte>(&data, 1));
 }
 
-template<typename T>
+template <typename T>
 Array<T>::Array(int size) : size(size) {}
 
-template<typename T> 
-Array<T>::Array(T* data, int size) : size(size)
+template <typename T>
+Array<T>::Array(T *data, int size) : size(size)
 {
     memcpy(this->buffer, data, size);
 }
 
-template<typename T> 
-T& Array<T>::operator[](int index)
+template <typename T>
+T &Array<T>::operator[](int index)
 {
     return buffer[index];
 }
 
-template<typename T>
+template <typename T>
 Array<T> Array<T>::slice(byte offset, byte length)
 {
     Array<T> sliced(length);

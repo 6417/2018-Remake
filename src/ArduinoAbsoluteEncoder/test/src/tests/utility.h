@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "print.h"
 #include "AbsoluteEncoderI2C-Master.h"
+#include "Stack.h"
 
 // Error codes
 namespace ERROR
@@ -28,11 +29,24 @@ enum Rquest {
 	RETURN_ALL_REGISTERS         = 0x31
 };
 
+Stack<uint8_t, 2> errorStack;
+
 byte getError();
 void printError(uint8_t err);
 bool readRegister(uint8_t reg, byte &retValue);
 bool writeRegister(uint8_t reg, byte value);
 bool checkForCRCError();
+bool checkForIncomingError(uint8_t error);
+
+bool checkForIncomingError(uint8_t error)
+{
+	if (error)
+	{
+		errorStack.push(error);
+		return false;
+	}
+	return true;
+}
 
 bool checkForCRCError() 
 {
@@ -46,60 +60,42 @@ bool checkForCRCError()
 
 byte getError()
 {
-	byte lastError = 0;
-	byte currentError = 0;
-	
+	Stack<byte, 2> slaveErrorStack;	
 	byte returnError = 0;
 	
 	println("Check for errors");
 	consoleTabIn();
 	delay(10);
-    Wire.beginTransmission(address);
-    Wire.write();
-    // Wire.write(0x01);
-    Wire.endTransmission();
-    byte recievedBytes = Wire.requestFrom(address, 1);      // request 1 bytes from slave device
-    // print(recievedBytes);
-    // println(" bytes empfangen");
-  
-    while (Wire.available()) { // slave may send less than requested
-      lastError = Wire.read(); // receive a byte as character
-    }
+	slaveErrorStack.push(i2c.read(Rquest::RETURN_LATEST_ERROR_ON_STACK, 2)[1]);
+	delay(10);
+	slaveErrorStack.push(i2c.read(Rquest::RETURN_LATEST_ERROR_ON_STACK, 2)[1]);
+
+	if (!errorStack.isEmpty())
+		errorStack.push(slaveErrorStack.pop());
+	else
+	{
+		errorStack.push(slaveErrorStack.pop());
+		errorStack.push(slaveErrorStack.pop());
+	}
+
     delay(10);
 
-  
-    Wire.beginTransmission(address);
-    Wire.write(RETURN_CURRENT_ERROR);
-    // Wire.write(0x01);
-    Wire.endTransmission();
-    recievedBytes = Wire.requestFrom(address, 1);      // request 1 bytes from slave device
-    // print(recievedBytes);
-    // println(" bytes empfangen");
-  
-    while (Wire.available()) { // slave may send less than requested
-        currentError = Wire.read(); // receive a byte as character
-    }
     print("Current Error: ");
-    printError(currentError);
+    printError(errorStack.peek());
     print("Last Error:    ");
-    printError(lastError);
-    
-    returnError = lastError;
-    if(currentError)
-		returnError = currentError;
-  
+    printError(errorStack.peek(1));
+
+	returnError = errorStack.pop();
+	if (!returnError)
+		returnError = errorStack.pop();
+
     delay(10);
     
-	if(currentError || lastError)
+	if(returnError)
 	{
 		//printError(err);
 		println("Waiting for red blink");
 		delay(8000);
-		Wire.beginTransmission(address);
-		Wire.write(CLEAR_ERROR);
-		// Wire.write(0x01);
-		Wire.endTransmission();
-		delay(10);
 	}
 	consoleTabOut();
 	return returnError;
@@ -112,11 +108,12 @@ void printError(uint8_t err)
 	print("\t");
 	switch(err)
 	{
-		case 0: println("No error"); break;
+		case ERROR::NO_ERROR: println("No error"); break;
 		case ERROR::BAD_I2C_REGISTER_REQUEST: println("BAD_I2C_REGISTER_REQUEST"); break;
 		case ERROR::BAD_I2C_REGISTER_ACCESS: println("BAD_I2C_REGISTER_ACCESS"); break;
 		case ERROR::I2C_TO_MUCH_DATA_RECIEVED: println("I2C_TO_MUCH_DATA_REVIEVED"); break;
 		case ERROR::I2C_TO_LESS_DATA_RECIEVED: println("I2C_TO_LESS_DATA_REVIEVED"); break;
+		case ERROR::INVALID_CRC: println("INVAILD_CRC"); break;
 		default: print("Error not known. Code: "); println(err);
 	}
 }
@@ -125,6 +122,7 @@ void printError(uint8_t err)
 bool readRegister(uint8_t reg, byte &retValue)
 {
 	bool success = true;
+	errorStack.clear();
 	
 	Array<byte> recievedBytes = i2c.read(reg, 2);
 	
@@ -132,7 +130,7 @@ bool readRegister(uint8_t reg, byte &retValue)
     {
 		success = false;
 		println("");
-		print("wrong byteAmount recieved from register: ");
+		print("[readRegister] wrong byteAmount recieved from register: ");
 		print(reg);
 		print(" bytes: ");
 		println(recievedBytes.size);
@@ -140,18 +138,13 @@ bool readRegister(uint8_t reg, byte &retValue)
     }
 
 	retValue = recievedBytes[1];
-<<<<<<< HEAD:src/ArduinoAbsoluteEncoder/test/tests/utility.h
-	if (AbsoluteEncoderI2C::Error::invalidCRCOcoured)
-		success = false;
-=======
 	success = success && checkForCRCError();
 
->>>>>>> 7221cf17772f690ffc9c06850a3d93ac64f37777:src/ArduinoAbsoluteEncoder/test/src/tests/utility.h
-	if (!recievedBytes[0])
-		success = false;
+	success = success && checkForIncomingError(recievedBytes[0]);
 	
 	return success;
 }
+
 bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
 {
 	bool success = true;
@@ -161,7 +154,7 @@ bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
     {
 		success = false;
 		println("");
-		print("wrong byteAmount recieved from register: ");
+		print("[readAllPositions] wrong byteAmount recieved from register: ");
 		print(RETURN_ALL_POSITIONS);
 		print(" bytes: ");
 		println(recievedBytes.size);
@@ -172,13 +165,9 @@ bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
 	homePos = recievedBytes[2];
 	relPos  = recievedBytes[3];
 
-	if (!recievedBytes[0])
-		success = false;
-<<<<<<< HEAD:src/ArduinoAbsoluteEncoder/test/tests/utility.h
-=======
-
 	success = success && checkForCRCError();
->>>>>>> 7221cf17772f690ffc9c06850a3d93ac64f37777:src/ArduinoAbsoluteEncoder/test/src/tests/utility.h
+
+	success = success && checkForIncomingError(recievedBytes[0]);
 	
 	return success;
 }
@@ -193,7 +182,7 @@ bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
     {
 		success = false;
 		println("");
-		print("wrong byteAmount recieved from register: ");
+		print("[readAllRegisters] wrong byteAmount recieved from register: ");
 		print(RETURN_ALL_REGISTERS);
 		print(" bytes: ");
 		println(recievedBytes.size);
@@ -206,10 +195,9 @@ bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
 	lastError 		= recievedBytes[5];
 	version  		= recievedBytes[6];
 	
-	if (!recievedBytes[0])
-		success = false;
-	
-	success = success && checkForCRCError;
+	success = success && checkForCRCError();
+
+	success = success && checkForIncomingError(recievedBytes[0]);
 	
 	return success;
 }

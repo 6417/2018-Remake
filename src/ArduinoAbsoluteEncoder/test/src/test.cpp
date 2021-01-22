@@ -31,14 +31,13 @@ void setup() {
     // physical max clk freq: 333kHz
     Wire.setClock(571428);
   #endif
-  Serial.begin(115200);  // start serial for output
 
   
   delay(10);
-    Wire.beginTransmission(address);
-    Wire.write(CLEAR_ERROR);
-    Wire.endTransmission();
+		i2c.write(CLEAR_ERROR);
   delay(10);
+
+  Serial.begin(115200);
 }
 
 void loop() {

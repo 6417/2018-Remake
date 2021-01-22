@@ -24,9 +24,11 @@ class AbsoluteEncoderI2C
 {
 private:
     byte SEQ;
+    bool sendErrorThroughRegister = true;
     byte calcCRC(Array<byte> data) noexcept;
     void readData(Array<byte> &data, byte length);
     void checkCRC(byte recCRC, byte CRC);
+    void setRegisterToError(Array<byte>& sendBuffer);
     Array<byte> createData(Array<byte> data);
 
 public:
@@ -34,6 +36,8 @@ public:
     void write(Array<byte> data);
     void write(byte data);
     void writeCurrentCriticalError();
+    void disableSendErrorThoughRegister();
+    void enableSendErrorThroughRegister();
     Array<byte> read();
 };
 

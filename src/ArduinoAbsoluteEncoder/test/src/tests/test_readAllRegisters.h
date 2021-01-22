@@ -16,14 +16,13 @@ bool test_readAllRegisters()
 	unsigned int minimalInterval = 0; 
 	bool millisMicros_switch = false; // false -> use millis
 	
-	const byte anzRegister = 5;
+	const byte anzRegister = 4;
 	byte registerList[anzRegister] = 
 	{
 		RETURN_ABS_POSITION,
 		SET_HOME,
 		RETURN_REL_POSITION,
-		RETURN_CURRENT_ERROR,
-		RETURN_LAST_ERROR
+		RETURN_LATEST_ERROR_ON_STACK
 	};
 	byte expectedList[anzRegister];
 	for(byte i=0; i<anzRegister; i++)
