@@ -37,7 +37,7 @@ void setup() {
 		i2c.write(CLEAR_ERROR);
   delay(10);
 
-  Serial.begin(115200);
+  Serial.begin(57600);
 }
 
 void loop() {

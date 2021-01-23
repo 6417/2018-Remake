@@ -70,6 +70,7 @@ byte getError()
 	delay(10);
 	slaveErrorStack.push(i2c.read(Rquest::RETURN_LATEST_ERROR_ON_STACK, 2)[1]);
 
+	delay(10);
 	if (!errorStack.isEmpty())
 		errorStack.push(slaveErrorStack.pop());
 	else
@@ -126,7 +127,7 @@ bool readRegister(uint8_t reg, byte &retValue)
 	
 	Array<byte> recievedBytes = i2c.read(reg, 2);
 	
-    if(recievedBytes.size != 2)
+    if(recievedBytes.size != 2 && recievedBytes.size != 1)
     {
 		success = false;
 		println("");
@@ -138,7 +139,7 @@ bool readRegister(uint8_t reg, byte &retValue)
     }
 
 	retValue = recievedBytes[1];
-	success = success && checkForCRCError();
+	// success = success && checkForCRCError();
 
 	success = success && checkForIncomingError(recievedBytes[0]);
 	
@@ -147,8 +148,9 @@ bool readRegister(uint8_t reg, byte &retValue)
 
 bool readAllPositions(byte &absPos,byte &homePos, byte &relPos)
 {
+	errorStack.clear();
 	bool success = true;
-	Array<byte> recievedBytes = i2c.read(Rquest::RETURN_ALL_POSITIONS);
+	Array<byte> recievedBytes = i2c.read(Rquest::RETURN_ALL_POSITIONS, 4);
 	
     if(recievedBytes.size != 4)
     {
@@ -175,6 +177,7 @@ bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
 					  byte &currentError,byte &lastError, byte &version)
 {
 	bool success = true;
+	errorStack.clear();
 	
 	Array<byte> recievedBytes = i2c.read(Rquest::RETURN_ALL_POSITIONS, 7);
 
@@ -203,6 +206,7 @@ bool readAllRegisters(byte &absPos,byte &homePos, byte &relPos,
 }
 bool writeRegister(uint8_t reg, byte value)
 {
+	errorStack.clear();
 	Array<byte> sendBuffer(2);
 	sendBuffer[0] = reg;
 	sendBuffer[1] = value;

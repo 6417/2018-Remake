@@ -14,7 +14,7 @@ bool test_readRelativeEncoderValue_muchData()
 	for(int cycle=0; cycle<cycles; cycle++)
 	{
 		// Sending data to a register, which shuldn't get data
-		writeRegister(RETURN_REL_POSITION,1);
+		writeRegister(RETURN_REL_POSITION, 1);
 	
 		byte response;
 		if(!readRegister(RETURN_REL_POSITION,response))

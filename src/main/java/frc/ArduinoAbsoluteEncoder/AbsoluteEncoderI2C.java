@@ -71,6 +71,12 @@ public class AbsoluteEncoderI2C extends I2C {
                 super(message);
             }
         }
+ 
+        public static class InvalidSize extends Exception {
+            public InvalidSize(String message) {
+                super(message);
+            }
+        }       
     }
 
     private static byte SEQ = 0x00;
@@ -123,20 +129,24 @@ public class AbsoluteEncoderI2C extends I2C {
                 .get(received.capacity() - 1))
             throw new Exception.InvalidCRC(String.format("Recived invalid CRC on address: %d", address));
         if (received.get(0) != SEQ)
-            throw new Exception.InvalidSEQ(String.format("recived wrong SEQ on address: %d", address));
+            throw new Exception.InvalidSEQ(String.format("Recived wrong SEQ on address: %d", address));
+        if (received.get(1) != received.capacity() - 4)
+            throw new Exception.InvalidSize(String.format("Recived invalid size, size should be %d, but is %d", received.capacity() - 4, received.get(1)));
     }
 
     public void read(Register register, ByteBuffer received) throws Exception {
         write(ByteBuffer.wrap(new byte[] { register.address }));
-        directRead(received);
+        ByteBuffer data = ByteBuffer.allocate(received.capacity());
+        directRead(data);
+        received = ByteBuffer.wrap(data.array(), 2, received.capacity());
     }
 
     private static final byte initTestResult = (byte) 0xfe;
 
     private void initTest() throws Exception {
-        ByteBuffer initBuffer = ByteBuffer.allocate(4);
+        ByteBuffer initBuffer = ByteBuffer.allocate(2);
         read(Register.INIT_TEST, initBuffer);
-        if (initBuffer.get(2) != initTestResult)
+        if (initBuffer.get(1) != initTestResult)
             throw new Exception.InitFailed(String.format("Failed to initialize device with I2C address: %d", address)); 
     }
 

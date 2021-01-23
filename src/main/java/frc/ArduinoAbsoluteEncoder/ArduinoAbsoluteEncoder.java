@@ -95,30 +95,8 @@ public class ArduinoAbsoluteEncoder {
         return mapPosition(buffer.get(0));
     }
 
-    private Error[] getErrors() throws Exception {
-        return new Error[] { Error.valueOf(getCurrentError().get(0)), Error.valueOf(getLastError().get(0)) };
-    }
-
-    private ByteBuffer getLastError() throws Exception {
-        ByteBuffer lastError = ByteBuffer.allocate(1);
-        device.read(AbsoluteEncoderI2C.Register.GET_LAST_ERROR, lastError);
-        return lastError;
-    }
-
-    private ByteBuffer getCurrentError() throws Exception {
-        ByteBuffer currentError = ByteBuffer.allocate(1);
-        device.read(AbsoluteEncoderI2C.Register.GET_CURRENT_ERROR, currentError);
-        return currentError;
-    }
-
-    private void printErrors() throws Exception {
-        for (Error e : getErrors())
-            printError(e);
-    }
-
-    private void printError(Error e) {
-        if (e != Error.NO_ERROR)
-            System.err.println("[ArduinoAbsoluteEncoder Error] " + e.name());
+    private void printError(byte error) {
+        DriverStation.getInstance().reportError(Error.valueOf(error).toString(), false);
     }
 
     /**
@@ -128,7 +106,7 @@ public class ArduinoAbsoluteEncoder {
     public double getRelPosition() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         device.read(AbsoluteEncoderI2C.Register.GET_REL_POSITION, buffer);
-        printErrors();
+        printError(buffer.get(0));
         return mapPosition(buffer.get(0));
     }
 
@@ -142,7 +120,7 @@ public class ArduinoAbsoluteEncoder {
     public Positions getPositions() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(3);
         device.read(AbsoluteEncoderI2C.Register.GET_ALL_POSITIONS, buffer);
-        printErrors();
+        printError(buffer.get(0));
         positions.absPos = mapPosition(buffer.get(0));
         positions.homePos = buffer.get(1);
         positions.relPos = mapPosition(buffer.get(2));

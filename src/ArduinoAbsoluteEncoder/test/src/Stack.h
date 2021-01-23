@@ -101,7 +101,8 @@ T Stack<T, size>::pop()
         exit("STACK: can't pop item from stack: stack is empty"); // will still retun a value but its undefined behaviour
 
     // fetch the top item from the array.
-    T item = contents[--top];
+    top--;
+    T item = contents[top];
 
     // return the top item from the array.
     return item;

@@ -15,6 +15,7 @@ bool test_readRelativeEncoderValue()
 		if(!readRegister(RETURN_REL_POSITION,relPos))
 		{
 			fail = 1;
+			println("failed to read register");
 			goto breakTest;
 		}
 	
